@@ -1,0 +1,23 @@
+import kagglehub
+import pandas as pd
+import shutil
+import os
+
+# 1. Download the dataset from Kaggle
+path = kagglehub.dataset_download("aravindpcoder/diabetes-dataset")
+print("Downloaded to temporary cache:", path)
+
+# 2. Look for the CSV file inside the downloaded folder
+downloaded_files = os.listdir(path)
+csv_file = [f for f in downloaded_files if f.endswith('.csv')][0]
+
+# 3. Copy it straight into your active project folder
+source_path = os.path.join(path, csv_file)
+destination_path = os.path.join(".", "diabetes_aravind.csv") # Saving it uniquely
+shutil.copy(source_path, destination_path)
+print(f"✨ SUCCESS! '{csv_file}' has been copied and saved as 'diabetes_aravind.csv'.")
+
+# 4. Read it right here so you can verify it looks correct
+df = pd.read_csv(destination_path)
+print("\n--- DIABETES DATA PREVIEW (FIRST 5 ROWS) ---")
+print(df.head())
