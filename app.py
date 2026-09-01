@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.graph_objects as go
 
 # ============================================================
@@ -411,87 +412,97 @@ button[aria-label="Increase value"]:hover {
     background-color: #1D4ED8 !important;
 }
 
-/* Selectbox: clean blue field like the reference */
+/* ============================================================
+   WHITE DROPDOWN INPUTS — ALL SELECTBOXES
+   Closed field: white with black text.
+   Open menu: white with black text.
+   Hover/selected option: blue with white text.
+   This stays white even in Dark mode, matching the reference.
+   ============================================================ */
+
+/* Closed selectbox field */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    border-color: #2563EB !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-color: #CBD5E1 !important;
     border-radius: 10px !important;
     box-shadow: none !important;
 }
 
+/* Closed selectbox text */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
     opacity: 1 !important;
 }
 
+/* Dropdown arrow */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
-    stroke: #FFFFFF !important;
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Blue opened select menu */
+/* Opened dropdown container */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] > div,
 div[data-baseweb="menu"],
 div[role="listbox"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    border-color: #2563EB !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-color: #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.14) !important;
 }
 
+/* Every dropdown option — white background + black text */
 div[data-baseweb="popover"] div[role="option"],
 div[data-baseweb="menu"] div[role="option"],
-div[role="listbox"] div[role="option"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-}
-
-div[data-baseweb="popover"] div[role="option"]:hover,
-div[data-baseweb="menu"] div[role="option"]:hover,
-div[role="listbox"] div[role="option"]:hover,
-div[role="option"][aria-selected="true"] {
-    background: #1D4ED8 !important;
-    background-color: #1D4ED8 !important;
-    color: #FFFFFF !important;
-}
-
-/* Force every opened selectbox option to stay blue */
-div[data-baseweb="popover"] [role="option"],
+div[role="listbox"] div[role="option"],
 div[data-baseweb="popover"] [role="option"] > div,
-div[data-baseweb="menu"] [role="option"],
 div[data-baseweb="menu"] [role="option"] > div,
-div[role="listbox"] [role="option"],
 div[role="listbox"] [role="option"] > div {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
 }
 
-/* Keep selectbox option text and icons white */
+/* Option text/icons — black */
 div[data-baseweb="popover"] [role="option"] *,
 div[data-baseweb="menu"] [role="option"] *,
 div[role="listbox"] [role="option"] * {
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
-    stroke: #FFFFFF !important;
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
 }
 
-/* Blue hover/selected state */
+/* Hover and selected option — blue, like the reference image */
 div[data-baseweb="popover"] [role="option"]:hover,
 div[data-baseweb="menu"] [role="option"]:hover,
 div[role="listbox"] [role="option"]:hover,
 div[data-baseweb="popover"] [role="option"][aria-selected="true"],
 div[data-baseweb="menu"] [role="option"][aria-selected="true"],
 div[role="listbox"] [role="option"][aria-selected="true"] {
-    background: #1D4ED8 !important;
-    background-color: #1D4ED8 !important;
+    background: #2563EB !important;
+    background-color: #2563EB !important;
     color: #FFFFFF !important;
+}
+
+/* Hover/selected text and icons — white */
+div[data-baseweb="popover"] [role="option"]:hover *,
+div[data-baseweb="menu"] [role="option"]:hover *,
+div[role="listbox"] [role="option"]:hover *,
+div[data-baseweb="popover"] [role="option"][aria-selected="true"] *,
+div[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
+div[role="listbox"] [role="option"][aria-selected="true"] * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
 }
 
 
@@ -748,6 +759,138 @@ button[kind="headerNoPadding"]:hover {
     border: none !important;
 }
 
+
+
+    /* ============================================================
+       PATIENT SNAPSHOT — BOLDER DARK-MODE TEXT
+       ============================================================ */
+    .patient-snapshot,
+    .patient-snapshot * {
+        font-weight: 700 !important;
+    }
+
+    .patient-snapshot .snapshot-label,
+    .patient-snapshot .snapshot-value {
+        color: #F8FAFC !important;
+        font-weight: 750 !important;
+        letter-spacing: 0.01em !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .patient-snapshot .snapshot-label,
+        .patient-snapshot .snapshot-value {
+            color: #FFFFFF !important;
+            font-weight: 750 !important;
+        }
+    }
+
+    /* Strong readable result snapshot text */
+    .result-snapshot-text {
+        color: #FFFFFF !important;
+        font-weight: 750 !important;
+        font-size: 0.95rem !important;
+    }
+
+
+/* ============================================================
+   FINAL SIDEBAR / SETTINGS LAYOUT
+   Always-open sidebar matching the dashboard reference.
+   ============================================================ */
+[data-testid="stSidebar"] {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+}
+
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide Streamlit's top-right toolbar / Deploy area. */
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+/* Keep the sidebar content comfortably spaced like the reference. */
+[data-testid="stSidebarContent"] {
+    padding-top: 1.1rem !important;
+    padding-left: 1.05rem !important;
+    padding-right: 1.05rem !important;
+}
+
+/* Theme selector */
+.theme-caption {
+    color: #94A3B8 !important;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin: 0 0 8px 4px;
+}
+
+.theme-row {
+    display: flex;
+    border: 1px solid rgba(148,163,184,.45);
+    border-radius: 9px;
+    overflow: hidden;
+    margin: 0 0 10px 0;
+}
+
+.theme-row-item {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    color: #E2E8F0 !important;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.theme-row-item.active {
+    background: #2563EB;
+    color: #FFFFFF !important;
+}
+
+.sidebar-setting {
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(148,163,184,.22);
+    color: #E2E8F0 !important;
+    font-size: 0.78rem;
+}
+
+.sidebar-setting span {
+    float: right;
+    color: #CBD5E1 !important;
+}
+
+/* Sidebar buttons used for utility rows */
+[data-testid="stSidebar"] .utility-button > button {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(148,163,184,.22) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    min-height: 38px !important;
+    padding: 6px 4px !important;
+    color: #E2E8F0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stSidebar"] .utility-button > button:hover {
+    background: rgba(255,255,255,.06) !important;
+    transform: none !important;
+}
+
+/* Make sidebar checkbox/toggle compact */
+[data-testid="stSidebar"] [data-testid="stCheckbox"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+
+/* Hide Streamlit's top-right Deploy/menu toolbar from the dashboard */
+[data-testid="stToolbar"] { display: none !important; }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -766,6 +909,128 @@ def load_disease_assets(disease_key):
 
     return model, scaler, features
 
+
+# ============================================================
+# FINAL SELECTBOX STYLE — MATCH CLOSED SELECTION BOX
+# ============================================================
+st.markdown("""
+<style>
+/* Closed selectbox: clean white selection box */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    border-color: #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    min-height: 42px !important;
+}
+
+/* All text inside the closed selection box */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] span,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] div,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+/* Dropdown arrow */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+    color: #0F172A !important;
+    fill: #0F172A !important;
+}
+
+/* Open dropdown: same white appearance as the selection box */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[data-baseweb="menu"],
+ul[role="listbox"],
+div[role="listbox"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14) !important;
+    overflow: hidden !important;
+}
+
+/* Every dropdown option */
+div[data-baseweb="menu"] li,
+div[data-baseweb="menu"] [role="option"],
+ul[role="listbox"] li,
+div[role="listbox"] [role="option"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    border: none !important;
+    min-height: 36px !important;
+    padding: 8px 12px !important;
+}
+
+/* Hover/selected option — blue, like the reference */
+div[data-baseweb="menu"] li:hover,
+div[data-baseweb="menu"] [role="option"]:hover,
+ul[role="listbox"] li:hover,
+div[role="listbox"] [role="option"]:hover,
+div[data-baseweb="menu"] [aria-selected="true"],
+div[data-baseweb="menu"] [role="option"][aria-selected="true"],
+div[role="listbox"] [aria-selected="true"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Text inside selected/hovered option */
+div[data-baseweb="menu"] li:hover *,
+div[data-baseweb="menu"] [role="option"]:hover *,
+div[data-baseweb="menu"] [aria-selected="true"] *,
+div[role="listbox"] [role="option"]:hover *,
+div[role="listbox"] [aria-selected="true"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Remove the blue focus outline around the popup itself */
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"] *,
+div[role="listbox"] * {
+    outline: none !important;
+}
+
+/* Keep the white dropdown even when the dashboard is in Dark Mode */
+@media (prefers-color-scheme: dark) {
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+    div[data-baseweb="popover"],
+    div[data-baseweb="menu"],
+    ul[role="listbox"],
+    div[role="listbox"],
+    div[data-baseweb="menu"] li,
+    div[data-baseweb="menu"] [role="option"],
+    ul[role="listbox"] li,
+    div[role="listbox"] [role="option"] {
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+    }
+
+    div[data-baseweb="menu"] li:hover,
+    div[data-baseweb="menu"] [role="option"]:hover,
+    div[data-baseweb="menu"] [aria-selected="true"],
+    div[role="listbox"] [role="option"]:hover,
+    div[role="listbox"] [aria-selected="true"] {
+        background: #2563EB !important;
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ============================================================
 # 5. CHARTS
 # ============================================================
@@ -776,19 +1041,19 @@ def chart_layout(fig, height=220):
         margin=dict(l=8, r=8, t=10, b=8),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter", color="#0F172A", size=12),
+        font=dict(family="Inter", color=plot_text_color(), size=12),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
-            tickfont=dict(color="#0F172A", size=11),
-            title=dict(font=dict(color="#0F172A", size=12)),
+            tickfont=dict(color=plot_text_color(), size=11),
+            title=dict(font=dict(color=plot_text_color(), size=12)),
         ),
         yaxis=dict(
             showgrid=True,
-            gridcolor="#CBD5E1",
+            gridcolor="#475569" if get_theme_mode() == "Dark" else "#CBD5E1",
             zeroline=False,
-            tickfont=dict(color="#0F172A", size=11),
-            title=dict(font=dict(color="#0F172A", size=12)),
+            tickfont=dict(color=plot_text_color(), size=11),
+            title=dict(font=dict(color=plot_text_color(), size=12)),
         ),
         showlegend=False,
     )
@@ -815,7 +1080,7 @@ def create_risk_trend():
         legend=dict(
             orientation="h",
             y=1.12,
-            font=dict(color="#0F172A", size=12),
+            font=dict(color=plot_text_color(), size=12),
         ),
     )
     return chart_layout(fig, 235)
@@ -837,14 +1102,14 @@ def create_distribution():
         legend=dict(
             orientation="h",
             y=-0.02,
-            font=dict(color="#0F172A", size=12),
+            font=dict(color=plot_text_color(), size=12),
         ),
         annotations=[dict(
             text="<b>1,284</b><br><span style='font-size:11px'>screened</span>",
             x=0.5,
             y=0.5,
             showarrow=False,
-            font=dict(color="#0F172A", size=16),
+            font=dict(color=plot_text_color(), size=16),
         )],
     )
     return fig
@@ -857,7 +1122,7 @@ def create_xai_chart(names, values):
         text=[f"{v:.0f}%" for v in values],
         textposition="outside",
         textfont=dict(
-            color="#0F172A",
+            color=plot_text_color(),
             size=16,
             family="Arial",
         ),
@@ -872,12 +1137,12 @@ def create_xai_chart(names, values):
             range=[0, 100],
             showgrid=False,
             showticklabels=False,
-            tickfont=dict(color="#0F172A", size=11),
+            tickfont=dict(color=plot_text_color(), size=11),
         ),
         yaxis=dict(
             showgrid=False,
-            tickfont=dict(color="#0F172A", size=12),
-            tickcolor="#0F172A",
+            tickfont=dict(color=plot_text_color(), size=12),
+            tickcolor=plot_text_color(),
         ),
     )
     return fig
@@ -952,6 +1217,15 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
     return pretty_names[::-1], pretty_scores[::-1]
 
 # ============================================================
+# THEME ENGINE
+# ============================================================
+def get_theme_mode():
+    return st.session_state.get("sidebar_theme", "Light")
+
+def plot_text_color():
+    return "#FFFFFF" if get_theme_mode() == "Dark" else "#0F172A"
+
+# ============================================================
 # 6. SIDEBAR NAVIGATION
 # ============================================================
 with st.sidebar:
@@ -985,11 +1259,365 @@ with st.sidebar:
         st.session_state.view_mode = "contact"
         st.rerun()
 
+    # ------------------------------------------------------------
+    # THEME SETTINGS / STREAMLIT-LIKE CONTROLS
+    # ------------------------------------------------------------
+    st.markdown("<div class='sidebar-label'>Theme Settings</div>", unsafe_allow_html=True)
+
+    theme_choice = st.radio(
+        "System",
+        ["Light", "Dark", "Auto"],
+        horizontal=True,
+        index=0,
+        key="sidebar_theme",
+        label_visibility="visible"
+    )
+
+    if theme_choice == "Dark":
+        st.markdown(
+            "<div class='small-muted'>Dark theme selected. Restart the app if the browser theme does not update immediately.</div>",
+            unsafe_allow_html=True
+        )
+    elif theme_choice == "Auto":
+        st.markdown(
+            "<div class='small-muted'>Auto follows your system preference.</div>",
+            unsafe_allow_html=True
+        )
+
+
+    if st.button("⌫   Clear cache", key="sidebar_clear_cache", use_container_width=True):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.success("Cache cleared.")
+
+    st.markdown(
+        "<div class='small-muted' style='margin-top:12px;'>Made with Streamlit</div>",
+        unsafe_allow_html=True
+    )
+
     st.markdown("---")
     st.markdown(
         "<div class='small-muted'>AI-assisted educational tool<br>Not a medical diagnosis</div>",
         unsafe_allow_html=True
     )
+
+# ============================================================
+# DYNAMIC DARK / LIGHT THEME
+# ============================================================
+# Light mode keeps the original clean white interface.
+# Dark mode changes white surfaces to black/dark surfaces and
+# switches all readable text, borders, inputs, tabs and charts.
+if get_theme_mode() == "Dark":
+    st.markdown("""
+    <style>
+        /* ============================================================
+           DARK MODE — HIGH CONTRAST
+           ============================================================ */
+
+        /* Main application */
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        .main,
+        section.main {
+            background: #05070B !important;
+        }
+
+        /* Main readable text */
+        h1, h2, h3, h4, h5, h6,
+        p, label, li,
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stMarkdownContainer"] p {
+            color: #F8FAFC !important;
+        }
+
+        .small-muted,
+        .nav-sub,
+        .kpi-label,
+        .kpi-sub,
+        .disease-text,
+        .xai-name,
+        .sidebar-label,
+        .stCaption {
+            color: #CBD5E1 !important;
+        }
+
+        .section-title,
+        .disease-title,
+        .kpi-value {
+            color: #FFFFFF !important;
+        }
+
+        /* Cards */
+        .dashboard-card,
+        .kpi-card,
+        .disease-card,
+        .stTabs [data-baseweb="tab-list"],
+        .stExpander,
+        [data-testid="stMetric"],
+        .recommendation {
+            background: #0B0F17 !important;
+            border-color: #334155 !important;
+            color: #F8FAFC !important;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+        }
+
+        .disease-icon {
+            background: #111827 !important;
+        }
+
+        /* ============================================================
+           INPUTS — WHITE IN BOTH LIGHT AND DARK MODE
+           ============================================================ */
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="input"],
+        div[data-testid="stNumberInputContainer"],
+        div[data-testid="stNumberInputContainer"] > div {
+            background: #FFFFFF !important;
+            background-color: #FFFFFF !important;
+            border-color: #CBD5E1 !important;
+            color: #0F172A !important;
+        }
+
+        input,
+        textarea {
+            background: #FFFFFF !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            -webkit-text-fill-color: #0F172A !important;
+            caret-color: #2563EB !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #64748B !important;
+            -webkit-text-fill-color: #64748B !important;
+            opacity: 1 !important;
+        }
+
+        /* Number-input +/- controls */
+        div[data-testid="stNumberInput"] button,
+        div[data-testid="stNumberInputContainer"] button {
+            background: #2563EB !important;
+            color: #FFFFFF !important;
+            border-color: #2563EB !important;
+        }
+
+        /* ============================================================
+           DROPDOWNS — WHITE WITH BLACK TEXT
+           ============================================================ */
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+        div[data-testid="stSelectbox"] div[data-baseweb="select"],
+        div[data-baseweb="select"] > div {
+            background: #FFFFFF !important;
+            background-color: #FFFFFF !important;
+            border-color: #CBD5E1 !important;
+            color: #0F172A !important;
+        }
+
+        div[data-testid="stSelectbox"] input {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+            -webkit-text-fill-color: #0F172A !important;
+        }
+
+        /* Open dropdown menu */
+        [data-baseweb="popover"],
+        [data-baseweb="menu"],
+        [role="listbox"],
+        [role="option"] {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+        }
+
+        [role="option"] {
+            color: #0F172A !important;
+        }
+
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background: #2563EB !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Dropdown icons */
+        div[data-testid="stSelectbox"] svg {
+            fill: #2563EB !important;
+            color: #2563EB !important;
+        }
+
+        /* ============================================================
+           CHARTS — FORCE ALL LABELS/TEXT TO BE BRIGHT
+           ============================================================ */
+        .js-plotly-plot,
+        .plotly,
+        .plot-container {
+            color: #FFFFFF !important;
+        }
+
+        .js-plotly-plot svg text,
+        .js-plotly-plot .xtick text,
+        .js-plotly-plot .ytick text,
+        .js-plotly-plot .gtitle text,
+        .js-plotly-plot .legend text,
+        .js-plotly-plot .annotation-text,
+        .js-plotly-plot .axis-title {
+            fill: #F8FAFC !important;
+            color: #F8FAFC !important;
+        }
+
+        .js-plotly-plot .xaxislayer-above text,
+        .js-plotly-plot .yaxislayer-above text,
+        .js-plotly-plot .legendtext {
+            fill: #F8FAFC !important;
+        }
+
+        .js-plotly-plot .xgrid,
+        .js-plotly-plot .ygrid {
+            stroke: #475569 !important;
+        }
+
+        .js-plotly-plot .zerolinelayer path,
+        .js-plotly-plot .xaxislayer-above path,
+        .js-plotly-plot .yaxislayer-above path {
+            stroke: #64748B !important;
+        }
+
+        /* Plotly hover text */
+        .js-plotly-plot .hovertext text,
+        .js-plotly-plot .axistext {
+            fill: #FFFFFF !important;
+        }
+
+        /* ============================================================
+           INFO / RECOMMENDATION BOXES
+           ============================================================ */
+        .info-box {
+            background: #0B1B35 !important;
+            border-color: #2563EB !important;
+            color: #E0F2FE !important;
+        }
+
+        .info-box *,
+        .recommendation * {
+            color: inherit !important;
+        }
+
+        .recommendation {
+            background: #111827 !important;
+            border-color: #334155 !important;
+            color: #E2E8F0 !important;
+        }
+
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            background: #0B0F17 !important;
+            border-color: #334155 !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            color: #CBD5E1 !important;
+        }
+
+        .stTabs [aria-selected="true"] {
+            color: #FFFFFF !important;
+        }
+
+        /* Alerts */
+        [data-testid="stAlert"] {
+            background: #111827 !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        [data-testid="stAlert"] * {
+            color: #F8FAFC !important;
+        }
+
+        hr {
+            border-color: #334155 !important;
+        }
+
+        /* Sidebar stays navy */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #060B16 0%, #0D172A 100%) !important;
+        }
+
+        [data-testid="stSidebar"] * {
+            color: #E2E8F0 !important;
+        }
+
+        /* Theme selector */
+        [data-testid="stRadio"] label {
+            color: #E2E8F0 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+elif get_theme_mode() == "Auto":
+    st.markdown("""
+    <style>
+    @media (prefers-color-scheme: dark) {
+        /* High-contrast inputs */
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="input"],
+        div[data-testid="stNumberInputContainer"],
+        div[data-testid="stNumberInputContainer"] > div,
+        input, textarea,
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            background: #FFFFFF !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            -webkit-text-fill-color: #0F172A !important;
+            border-color: #CBD5E1 !important;
+        }
+
+        [role="listbox"],
+        [role="option"],
+        [data-baseweb="menu"],
+        [data-baseweb="popover"] {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+        }
+
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background: #2563EB !important;
+            color: #FFFFFF !important;
+        }
+
+        /* High-contrast Plotly labels */
+        .js-plotly-plot svg text,
+        .js-plotly-plot .xtick text,
+        .js-plotly-plot .ytick text,
+        .js-plotly-plot .legend text,
+        .js-plotly-plot .annotation-text,
+        .js-plotly-plot .axis-title {
+            fill: #F8FAFC !important;
+            color: #F8FAFC !important;
+        }
+
+        .js-plotly-plot .xgrid,
+        .js-plotly-plot .ygrid {
+            stroke: #475569 !important;
+        }
+
+        .stApp, [data-testid="stAppViewContainer"], .main, section.main { background: #05070B !important; }
+        h1, h2, h3, h4, h5, h6, p, label, span, div, li { color: #F8FAFC !important; }
+        .dashboard-card, .kpi-card, .disease-card, .stTabs [data-baseweb="tab-list"], .recommendation {
+            background: #0B0F17 !important; border-color: #273244 !important; color: #F8FAFC !important;
+        }
+        .disease-icon { background: #111827 !important; }
+        .disease-title, .section-title, .kpi-value { color: #F8FAFC !important; }
+        div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, div[data-testid="stNumberInputContainer"], input, textarea {
+            background: #111827 !important; background-color: #111827 !important; color: #F8FAFC !important; -webkit-text-fill-color: #F8FAFC !important; border-color: #334155 !important;
+        }
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div { background: #2563EB !important; background-color: #2563EB !important; }
+        .info-box { background: #0B1B35 !important; border-color: #1D4ED8 !important; color: #BFDBFE !important; }
+        .recommendation { background: #111827 !important; border-color: #273244 !important; }
+        hr { border-color: #273244 !important; }
+        [data-testid="stSidebar"] { background: linear-gradient(180deg, #060B16 0%, #0D172A 100%) !important; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ============================================================
 # 7. TOP HEADER
@@ -1811,6 +2439,7 @@ elif st.session_state.view_mode == "result":
             st.session_state.view_mode = "dashboard"
             st.rerun()
 
+  
 # ============================================================
 # 12. ABOUT PAGE
 # ============================================================
