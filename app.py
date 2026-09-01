@@ -438,6 +438,26 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
     opacity: 1 !important;
 }
 
+
+/* Hide the text caret inside Streamlit selectboxes.
+   Streamlit uses an internal input for the selectbox; in dark mode
+   the caret can look like a typing cursor inside the selected value. */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input[role="combobox"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"] [contenteditable="true"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"] [contenteditable="true"] * {
+    caret-color: transparent !important;
+    cursor: default !important;
+    outline: none !important;
+}
+
+/* Never show a text cursor while a selectbox is focused/open. */
+div[data-testid="stSelectbox"]:focus-within input,
+div[data-testid="stSelectbox"]:focus-within [contenteditable="true"] {
+    caret-color: transparent !important;
+    cursor: default !important;
+}
+
 /* Dropdown arrow */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
     color: #0F172A !important;
@@ -1060,40 +1080,72 @@ def chart_layout(fig, height=220):
     return fig
 
 def create_risk_trend():
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"]
-    diabetes = [18, 24, 20, 31, 27, 36, 32]
-    heart = [12, 17, 15, 21, 18, 25, 22]
+    # Actual overall disease prevalence in the three training datasets.
+    # These values are calculated from the target column of each dataset.
+    diseases = ["Diabetes", "Heart Disease", "Chronic Kidney Disease"]
+    prevalence = [89.2, 51.3, 50.8]
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=months, y=diabetes, mode="lines",
-        line=dict(width=3), name="Diabetes",
-        fill="tozeroy", fillcolor="rgba(14,165,233,0.10)"
+
+    fig.add_trace(go.Bar(
+        x=diseases,
+        y=prevalence,
+        text=[f"{v:.1f}%" for v in prevalence],
+        textposition="outside",
+        textfont=dict(
+            color=plot_text_color(),
+            size=13,
+            family="Inter",
+        ),
+        marker=dict(
+            color=["#2563EB", "#F97316", "#10B981"],
+            line=dict(width=0),
+        ),
+        hovertemplate="%{x}: %{y:.1f}%<extra></extra>",
     ))
-    fig.add_trace(go.Scatter(
-        x=months, y=heart, mode="lines",
-        line=dict(width=3), name="Heart",
-        fill="tozeroy", fillcolor="rgba(99,102,241,0.08)"
-    ))
+
     fig.update_layout(
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            y=1.12,
-            font=dict(color=plot_text_color(), size=12),
+        showlegend=False,
+        yaxis=dict(
+            title=dict(
+                text="Disease Prevalence (%)",
+                font=dict(color=plot_text_color(), size=11),
+            ),
+            range=[0, 100],
+            tickfont=dict(color=plot_text_color(), size=10),
+            gridcolor="#475569" if get_theme_mode() == "Dark" else "#CBD5E1",
+            zeroline=False,
+        ),
+        xaxis=dict(
+            title=dict(
+                text="Training Dataset",
+                font=dict(color=plot_text_color(), size=11),
+            ),
+            tickfont=dict(color=plot_text_color(), size=10),
+            showgrid=False,
         ),
     )
-    return chart_layout(fig, 235)
+
+    return chart_layout(fig, 250)
+
 
 def create_distribution():
-    labels = ["Low Risk", "Moderate", "High Risk"]
-    values = [62, 25, 13]
+    # Actual combined class counts across the three training datasets.
+    labels = ["No Disease", "Disease Present"]
+    values = [1387, 2033]
+
     fig = go.Figure(go.Pie(
         labels=labels,
         values=values,
         hole=0.72,
         textinfo="none",
+        hovertemplate="%{label}: %{value:,} records (%{percent})<extra></extra>",
+        marker=dict(
+            colors=["#60A5FA", "#EF4444"],
+            line=dict(color="#FFFFFF", width=1),
+        ),
     ))
+
     fig.update_layout(
         height=210,
         margin=dict(l=5, r=5, t=5, b=5),
@@ -1102,10 +1154,12 @@ def create_distribution():
         legend=dict(
             orientation="h",
             y=-0.02,
-            font=dict(color=plot_text_color(), size=12),
+            x=0.5,
+            xanchor="center",
+            font=dict(color=plot_text_color(), size=11),
         ),
         annotations=[dict(
-            text="<b>1,284</b><br><span style='font-size:11px'>screened</span>",
+            text="<b>3,420</b><br><span style='font-size:11px'>training records</span>",
             x=0.5,
             y=0.5,
             showarrow=False,
@@ -1113,6 +1167,8 @@ def create_distribution():
         )],
     )
     return fig
+
+
 
 def create_xai_chart(names, values):
     fig = go.Figure(go.Bar(
@@ -1262,10 +1318,10 @@ with st.sidebar:
     # ------------------------------------------------------------
     # THEME SETTINGS / STREAMLIT-LIKE CONTROLS
     # ------------------------------------------------------------
-    st.markdown("<div class='sidebar-label'>Theme Settings</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-label'>System Settings</div>", unsafe_allow_html=True)
 
     theme_choice = st.radio(
-        "System",
+        "Theme",
         ["Light", "Dark", "Auto"],
         horizontal=True,
         index=0,
@@ -1729,12 +1785,12 @@ if st.session_state.view_mode == "dashboard":
     a1, a2 = st.columns([1.45, 1])
 
     with a1:
-        st.markdown("<div class='section-title'>Illustrative Risk Trend Overview</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Disease Prevalence in Training Datasets</div>", unsafe_allow_html=True)
         st.plotly_chart(create_risk_trend(), use_container_width=True, config={"displayModeBar": False})
 
     with a2:
         st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-title'>Screening Distribution (Illustrative)</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Training Dataset Distribution</div>", unsafe_allow_html=True)
         st.plotly_chart(create_distribution(), use_container_width=True, config={"displayModeBar": False})
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -2438,6 +2494,16 @@ elif st.session_state.view_mode == "result":
         if st.button("🏠 Dashboard", use_container_width=True):
             st.session_state.view_mode = "dashboard"
             st.rerun()
+
+
+    # Print is available only on the prediction result page.
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+    if st.button("🖨️  Print Result", key="result_print", use_container_width=True):
+        components.html("""
+            <script>
+                window.top.print();
+            </script>
+        """, height=1, scrolling=False)
 
   
 # ============================================================
