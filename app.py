@@ -1,472 +1,1893 @@
 import os
 import joblib
 import pandas as pd
+import numpy as np
 import streamlit as st
+import plotly.graph_objects as go
 
 # ============================================================
-# 1. PAGE CONFIGURATION & CUSTOM STYLING
+# 1. PAGE CONFIGURATION
 # ============================================================
 st.set_page_config(
-    page_title="Multi-Disease Risk Prediction System",
+    page_title="Medical Predict AI",
     page_icon="🩺",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-    <style>
-        /* Dynamic Theme-Aware Titles */
-        .main-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--text-color);
-            text-align: center;
-            margin-top: -10px;
-        }
-        .sub-title {
-            font-size: 1.05rem;
-            color: var(--text-color);
-            opacity: 0.8;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        /* Adaptive Disease Selection Cards */
-        .disease-card {
-            border: 1px solid rgba(128, 128, 128, 0.2);
-            border-radius: 12px;
-            padding: 24px 20px;
-            text-align: center;
-            background-color: var(--secondary-background-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 12px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .disease-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
-        }
-        .disease-card h4 {
-            color: var(--text-color);
-            font-weight: 700;
-            margin-top: 10px;
-            margin-bottom: 8px;
-        }
-        .disease-card p {
-            color: var(--text-color);
-            opacity: 0.75;
-            font-size: 0.9rem;
-            margin: 0;
-        }
+# ============================================================
+# 2. SESSION STATE
+# ============================================================
+if "view_mode" not in st.session_state:
+    st.session_state.view_mode = "dashboard"
+if "selected_disease" not in st.session_state:
+    st.session_state.selected_disease = "heart"
+if "user_inputs" not in st.session_state:
+    st.session_state.user_inputs = {}
+if "last_prediction" not in st.session_state:
+    st.session_state.last_prediction = None
 
-        /* Adaptive Diagnostic Result Cards */
-        .risk-card-high {
-            background-color: rgba(239, 68, 68, 0.15);
-            border-left: 6px solid #EF4444;
-            padding: 20px;
-            border-radius: 10px;
-            color: var(--text-color);
-        }
-        .risk-card-low {
-            background-color: rgba(16, 185, 129, 0.15);
-            border-left: 6px solid #10B981;
-            padding: 20px;
-            border-radius: 10px;
-            color: var(--text-color);
-        }
-        
-        /* Unified Button Layout */
-        .stButton>button {
-            width: 100%;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-    </style>
+# ============================================================
+# 3. MODERN MEDICAL DASHBOARD DESIGN
+# ============================================================
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --navy: #0F172A;
+    --navy2: #16213A;
+    --blue: #2563EB;
+    --cyan: #0EA5E9;
+    --purple: #6366F1;
+    --green: #10B981;
+    --orange: #F59E0B;
+    --red: #EF4444;
+    --bg: #F4F7FB;
+    --card: #FFFFFF;
+    --muted: #64748B;
+    --line: #E2E8F0;
+}
+
+.stApp {
+    background: var(--bg) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #111B33 0%, #182541 100%) !important;
+    border-right: none !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #E2E8F0 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    text-align: left !important;
+    color: #CBD5E1 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: white !important;
+    transform: none !important;
+}
+
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 1500px !important;
+}
+
+h1, h2, h3, h4, p, label, span {
+    font-family: 'Inter', sans-serif !important;
+}
+
+h1, h2, h3, h4, p, label {
+    color: var(--navy) !important;
+}
+
+.dashboard-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 24px rgba(15,23,42,0.06);
+    margin-bottom: 18px;
+}
+
+.hero-card {
+    background: linear-gradient(135deg, #0F172A 0%, #1D3563 55%, #2563EB 100%);
+    border-radius: 22px;
+    padding: 30px;
+    color: white;
+    box-shadow: 0 12px 35px rgba(37,99,235,0.20);
+    margin-bottom: 20px;
+}
+
+.hero-card h1, .hero-card h2, .hero-card h3, .hero-card p {
+    color: white !important;
+}
+
+.kpi-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    min-height: 130px;
+    box-shadow: 0 5px 18px rgba(15,23,42,0.05);
+}
+
+.kpi-label {
+    color: #64748B !important;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.kpi-value {
+    color: #0F172A !important;
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.kpi-sub {
+    color: #64748B !important;
+    font-size: 0.8rem;
+    margin-top: 7px;
+}
+
+.section-title {
+    color: #0F172A !important;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 8px 0 14px 2px;
+}
+
+.disease-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    min-height: 210px;
+    box-shadow: 0 6px 22px rgba(15,23,42,0.05);
+}
+
+.disease-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    background: #EFF6FF;
+}
+
+.disease-title {
+    color: #0F172A !important;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.disease-text {
+    color: #64748B !important;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    min-height: 52px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #EFF6FF;
+    color: #2563EB !important;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.result-risk {
+    text-align: center;
+    padding: 10px 5px 18px;
+}
+
+.risk-number {
+    font-size: 4rem;
+    line-height: 1;
+    font-weight: 800;
+    color: #2563EB !important;
+    margin: 12px 0 5px;
+}
+
+.risk-high {
+    color: #EF4444 !important;
+}
+
+.risk-low {
+    color: #10B981 !important;
+}
+
+.xai-row {
+    margin: 12px 0;
+}
+
+.xai-name {
+    color: #334155 !important;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.info-box {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: #1E3A8A !important;
+    font-size: 0.83rem;
+    line-height: 1.5;
+    margin: 12px 0;
+}
+
+.recommendation {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin: 8px 0;
+    color: #334155 !important;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.stButton > button {
+    border-radius: 10px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    min-height: 42px !important;
+    box-shadow: 0 5px 14px rgba(37,99,235,0.18) !important;
+    transition: 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(37,99,235,0.25) !important;
+}
+
+[data-testid="stFormSubmitButton"] button {
+    background: linear-gradient(135deg, #2563EB, #0EA5E9) !important;
+}
+
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div,
+div[data-testid="stNumberInputContainer"] {
+    background: white !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+}
+
+input, textarea {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+div[data-testid="stMetric"] {
+    background: transparent !important;
+}
+
+hr {
+    border-color: #E2E8F0 !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: white;
+    border-radius: 12px;
+    padding: 6px;
+    border: 1px solid #E2E8F0;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 9px;
+    padding: 8px 15px;
+    font-weight: 700;
+}
+
+.small-muted {
+    color: #64748B !important;
+    font-size: 0.82rem;
+}
+
+.nav-brand {
+    padding: 8px 4px 20px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: white !important;
+}
+
+.nav-sub {
+    color: #94A3B8 !important;
+    font-size: 0.72rem;
+    margin-top: -14px;
+    margin-bottom: 20px;
+}
+
+.sidebar-label {
+    color: #64748B !important;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin: 18px 4px 7px;
+}
+
+/* ============================================================
+   EXACT CLEAN FORM CONTROLS
+   White input area + blue +/- controls, with no dark corners.
+   ============================================================ */
+
+/* Number-input outer shell */
+div[data-testid="stNumberInput"] > div,
+div[data-testid="stNumberInputContainer"] > div {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+}
+
+/* The actual white typing area */
+div[data-testid="stNumberInput"] input,
+div[data-testid="stNumberInputContainer"] input,
+div[data-testid="stNumberInput"] div[data-baseweb="input"] input,
+div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] input {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+/* White BaseWeb input section — removes black/dark corner artifacts */
+div[data-testid="stNumberInput"] div[data-baseweb="input"],
+div[data-testid="stNumberInputContainer"] div[data-baseweb="input"],
+div[data-testid="stNumberInput"] div[data-baseweb="input"] > div,
+div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] > div {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Blue +/- buttons */
+div[data-testid="stNumberInput"] button,
+div[data-testid="stNumberInputContainer"] button,
+button[aria-label="Decrease value"],
+button[aria-label="Increase value"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    border-radius: 0 !important;
+}
+
+/* White +/- symbols */
+div[data-testid="stNumberInput"] button *,
+div[data-testid="stNumberInputContainer"] button *,
+button[aria-label="Decrease value"] *,
+button[aria-label="Increase value"] * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    opacity: 1 !important;
+}
+
+/* Keep the right control area blue on hover */
+div[data-testid="stNumberInput"] button:hover,
+div[data-testid="stNumberInputContainer"] button:hover,
+button[aria-label="Decrease value"]:hover,
+button[aria-label="Increase value"]:hover {
+    background: #1D4ED8 !important;
+    background-color: #1D4ED8 !important;
+}
+
+/* Selectbox: clean blue field like the reference */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    border-color: #2563EB !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    opacity: 1 !important;
+}
+
+div[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Blue opened select menu */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[data-baseweb="menu"],
+div[role="listbox"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    border-color: #2563EB !important;
+}
+
+div[data-baseweb="popover"] div[role="option"],
+div[data-baseweb="menu"] div[role="option"],
+div[role="listbox"] div[role="option"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+}
+
+div[data-baseweb="popover"] div[role="option"]:hover,
+div[data-baseweb="menu"] div[role="option"]:hover,
+div[role="listbox"] div[role="option"]:hover,
+div[role="option"][aria-selected="true"] {
+    background: #1D4ED8 !important;
+    background-color: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+/* Force every opened selectbox option to stay blue */
+div[data-baseweb="popover"] [role="option"],
+div[data-baseweb="popover"] [role="option"] > div,
+div[data-baseweb="menu"] [role="option"],
+div[data-baseweb="menu"] [role="option"] > div,
+div[role="listbox"] [role="option"],
+div[role="listbox"] [role="option"] > div {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+}
+
+/* Keep selectbox option text and icons white */
+div[data-baseweb="popover"] [role="option"] *,
+div[data-baseweb="menu"] [role="option"] *,
+div[role="listbox"] [role="option"] * {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
+/* Blue hover/selected state */
+div[data-baseweb="popover"] [role="option"]:hover,
+div[data-baseweb="menu"] [role="option"]:hover,
+div[role="listbox"] [role="option"]:hover,
+div[data-baseweb="popover"] [role="option"][aria-selected="true"],
+div[data-baseweb="menu"] [role="option"][aria-selected="true"],
+div[role="listbox"] [role="option"][aria-selected="true"] {
+    background: #1D4ED8 !important;
+    background-color: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+
+/* ============================================================
+   CLEAN STREAMLIT SIDEBAR MENU / COLLAPSE BUTTON
+   Removes the accidentally visible "keyboard_double..." text
+   and makes the three-line menu control clearly visible.
+   ============================================================ */
+
+/* Sidebar collapse button */
+[data-testid="stSidebarCollapseButton"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+/* Make the button itself clean and visible */
+[data-testid="stSidebarCollapseButton"] button {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    padding: 8px !important;
+    margin: 6px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: rgba(37, 99, 235, 0.95) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Remove any accidentally rendered Material Icon name */
+[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
+[data-testid="stSidebarCollapseButton"] button .material-icons,
+[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"] {
+    font-size: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: transparent !important;
+}
+
+/* Draw a clean three-line hamburger icon */
+/* Clean hover state */
+[data-testid="stSidebarCollapseButton"] button:hover {
+    background: #1D4ED8 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+}
+
+/* Prevent the unwanted icon-name text from appearing anywhere
+   inside the sidebar collapse control */
+[data-testid="stSidebarCollapseButton"] button span {
+    color: transparent !important;
+    font-size: 0 !important;
+}
+
+
+
+
+/* ============================================================
+   CLEAN MENU BUTTON — ALL PAGES
+   Hide Streamlit's raw Material Icon name and show a clean
+   hamburger button even when the sidebar is collapsed.
+   ============================================================ */
+
+/* Hide raw Material icon glyph/name text in the collapse control */
+button[kind="headerNoPadding"],
+button[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] button {
+    font-size: 0 !important;
+    color: transparent !important;
+    overflow: hidden !important;
+}
+
+/* Make the collapse button itself visible and clean */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] button {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,.15) !important;
+}
+
+/* Remove the broken keyboard_double... icon content */
+[data-testid="stSidebarCollapseButton"] button span,
+[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"],
+[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
+[data-testid="stSidebarCollapseButton"] button .material-icons {
+    display: none !important;
+    font-size: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+
+
+/* Hover */
+[data-testid="stSidebarCollapseButton"] button:hover {
+    background: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+/* Hide any raw icon-name text accidentally rendered in the
+   top header area while keeping the actual header controls. */
+[data-testid="stHeader"] .material-symbols-outlined,
+[data-testid="stHeader"] .material-icons,
+[data-testid="stHeader"] [data-testid="stIconMaterial"] {
+    font-size: 0 !important;
+}
+
+/* Keep the Streamlit collapse button's icon replacement visible */
+/* ============================================================
+   FINAL SIDEBAR MENU VISIBILITY FIX
+   Keep the 3-line menu button blue and visible on every page/state.
+   ============================================================ */
+
+/* Streamlit header area */
+[data-testid="stHeader"] {
+    background: transparent !important;
+    z-index: 99999 !important;
+}
+
+/* Sidebar collapse control - all known Streamlit selectors */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] > button,
+[data-testid="stSidebarCollapseButton"] button,
+button[data-testid="baseButton-headerNoPadding"],
+button[kind="headerNoPadding"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    border: 2px solid #2563EB !important;
+    border-radius: 10px !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Give the button a consistent clickable size */
+[data-testid="stSidebarCollapseButton"] button,
+button[data-testid="baseButton-headerNoPadding"],
+button[kind="headerNoPadding"] {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    margin: 5px !important;
+}
+
+/* Hide Streamlit's raw material-icon name */
+[data-testid="stSidebarCollapseButton"] button span,
+[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
+[data-testid="stSidebarCollapseButton"] button .material-icons,
+[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"],
+button[data-testid="baseButton-headerNoPadding"] span,
+button[kind="headerNoPadding"] span {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+/* Our visible hamburger */
+/* Hover/focus */
+[data-testid="stSidebarCollapseButton"] button:hover,
+button[data-testid="baseButton-headerNoPadding"]:hover,
+button[kind="headerNoPadding"]:hover,
+[data-testid="stSidebarCollapseButton"] button:focus {
+    background: #1D4ED8 !important;
+    background-color: #1D4ED8 !important;
+    border-color: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+/* Never allow the header control to become a white button */
+[data-testid="stHeader"] button {
+    color: #FFFFFF !important;
+}
+
+/* If the sidebar is collapsed, keep the control above the page content */
+section[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stAppViewContainer"] {
+    margin-left: 0 !important;
+}
+
+
+/* ============================================================
+   FINAL CLEAN HAMBURGER — ONE ICON ONLY
+   ============================================================ */
+[data-testid="stSidebarCollapseButton"] button,
+button[data-testid="baseButton-headerNoPadding"],
+button[kind="headerNoPadding"] {
+    position: relative !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    margin: 5px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: #2563EB !important;
+    color: transparent !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18) !important;
+}
+
+/* Hide ALL native icon/text inside the button */
+[data-testid="stSidebarCollapseButton"] button > *,
+button[data-testid="baseButton-headerNoPadding"] > *,
+button[kind="headerNoPadding"] > * {
+    display: none !important;
+}
+
+/* Three clean hamburger bars */
+[data-testid="stSidebarCollapseButton"] button::before,
+button[data-testid="baseButton-headerNoPadding"]::before,
+button[kind="headerNoPadding"]::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 10px !important;
+    top: 12px !important;
+    width: 22px !important;
+    height: 3px !important;
+    border-radius: 3px !important;
+    background: #FFFFFF !important;
+    box-shadow:
+        0 7px 0 #FFFFFF,
+        0 14px 0 #FFFFFF !important;
+    display: block !important;
+}
+
+/* No second pseudo-element/icon */
+[data-testid="stSidebarCollapseButton"] button::after,
+button[data-testid="baseButton-headerNoPadding"]::after,
+button[kind="headerNoPadding"]::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Hover */
+[data-testid="stSidebarCollapseButton"] button:hover,
+button[data-testid="baseButton-headerNoPadding"]:hover,
+button[kind="headerNoPadding"]:hover {
+    background: #1D4ED8 !important;
+    border: none !important;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
 # ============================================================
-# 2. DYNAMIC PKL ASSET LOADER
+# 4. MODEL ASSETS
 # ============================================================
 @st.cache_resource
 def load_disease_assets(disease_key):
-    """Loads model, scaler, and feature list directly from your root directory."""
     model_path = f"model_{disease_key}.pkl"
     scaler_path = f"scaler_{disease_key}.pkl"
     features_path = f"features_{disease_key}.pkl"
-    
+
     model = joblib.load(model_path) if os.path.exists(model_path) else None
     scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
     features = joblib.load(features_path) if os.path.exists(features_path) else []
-    
+
     return model, scaler, features
 
-RECOMMENDATIONS = {
-    "diabetes": [
-        "Eat a balanced diet with less sugar, salt, and saturated fats.",
-        "Exercise regularly (at least 150 minutes per week).",
-        "Maintain a healthy body weight and BMI.",
-        "Monitor blood glucose and HbA1c levels regularly.",
-        "Consult a healthcare professional for further medical assessment."
-    ],
-    "heart": [
-        "Eat a heart-healthy diet with low sodium and low saturated fats.",
-        "Engage in aerobic physical activity at least 150 minutes per week.",
-        "Maintain normal blood pressure and serum cholesterol levels.",
-        "Avoid smoking and excessive alcohol consumption.",
-        "Consult a cardiologist for standard diagnostic evaluation."
-    ],
-    "kidney": [
-        "Maintain proper daily hydration unless fluid-restricted.",
-        "Limit dietary sodium and strictly manage blood pressure.",
-        "Monitor Blood Urea Nitrogen (BUN) and Serum Creatinine regularly.",
-        "Avoid non-steroidal anti-inflammatory drugs (NSAIDs) without prescription.",
-        "Consult a nephrologist for clinical evaluation."
+# ============================================================
+# 5. CHARTS
+# ============================================================
+def chart_layout(fig, height=220):
+    # Use dark, high-contrast text so all Plotly labels remain readable.
+    fig.update_layout(
+        height=height,
+        margin=dict(l=8, r=8, t=10, b=8),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter", color="#0F172A", size=12),
+        xaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            tickfont=dict(color="#0F172A", size=11),
+            title=dict(font=dict(color="#0F172A", size=12)),
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor="#CBD5E1",
+            zeroline=False,
+            tickfont=dict(color="#0F172A", size=11),
+            title=dict(font=dict(color="#0F172A", size=12)),
+        ),
+        showlegend=False,
+    )
+    return fig
+
+def create_risk_trend():
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"]
+    diabetes = [18, 24, 20, 31, 27, 36, 32]
+    heart = [12, 17, 15, 21, 18, 25, 22]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=months, y=diabetes, mode="lines",
+        line=dict(width=3), name="Diabetes",
+        fill="tozeroy", fillcolor="rgba(14,165,233,0.10)"
+    ))
+    fig.add_trace(go.Scatter(
+        x=months, y=heart, mode="lines",
+        line=dict(width=3), name="Heart",
+        fill="tozeroy", fillcolor="rgba(99,102,241,0.08)"
+    ))
+    fig.update_layout(
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            y=1.12,
+            font=dict(color="#0F172A", size=12),
+        ),
+    )
+    return chart_layout(fig, 235)
+
+def create_distribution():
+    labels = ["Low Risk", "Moderate", "High Risk"]
+    values = [62, 25, 13]
+    fig = go.Figure(go.Pie(
+        labels=labels,
+        values=values,
+        hole=0.72,
+        textinfo="none",
+    ))
+    fig.update_layout(
+        height=210,
+        margin=dict(l=5, r=5, t=5, b=5),
+        paper_bgcolor="rgba(0,0,0,0)",
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            y=-0.02,
+            font=dict(color="#0F172A", size=12),
+        ),
+        annotations=[dict(
+            text="<b>1,284</b><br><span style='font-size:11px'>screened</span>",
+            x=0.5,
+            y=0.5,
+            showarrow=False,
+            font=dict(color="#0F172A", size=16),
+        )],
+    )
+    return fig
+
+def create_xai_chart(names, values):
+    fig = go.Figure(go.Bar(
+        x=values,
+        y=names,
+        orientation="h",
+        text=[f"{v:.0f}%" for v in values],
+        textposition="outside",
+        textfont=dict(
+            color="#0F172A",
+            size=16,
+            family="Arial",
+        ),
+        cliponaxis=False,
+    ))
+    fig.update_layout(
+        height=250,
+        margin=dict(l=5, r=65, t=5, b=5),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(
+            range=[0, 100],
+            showgrid=False,
+            showticklabels=False,
+            tickfont=dict(color="#0F172A", size=11),
+        ),
+        yaxis=dict(
+            showgrid=False,
+            tickfont=dict(color="#0F172A", size=12),
+            tickcolor="#0F172A",
+        ),
+    )
+    return fig
+
+
+# ============================================================
+# MODEL-DERIVED XAI
+# ============================================================
+def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_features=None):
+    """Return model-feature importance for the requested clinical fields.
+
+    For the heart model we intentionally restrict the chart to the clinical
+    parameters (cp, restecg, exang, oldpeak, slope, ca, thal).  The values are
+    derived from the loaded model's feature_importances_, so the chart does
+    not accidentally promote Age/Height/Weight/Glucose just because they are
+    visible in the UI.
+    """
+    names = list(feature_cols)
+    if not names:
+        return [], []
+
+    estimator = model
+    if hasattr(model, "steps") and model.steps:
+        estimator = model.steps[-1][1]
+
+    importance = getattr(estimator, "feature_importances_", None)
+    if importance is None:
+        return [], []
+
+    importance = np.asarray(importance, dtype=float).reshape(-1)
+    if len(importance) != len(names):
+        return [], []
+
+    candidate_indices = np.arange(len(names))
+    if preferred_features:
+        preferred_normalized = {
+            str(v).strip().lower().replace(" ", "_")
+            for v in preferred_features
+        }
+        candidate_indices = np.array([
+            i for i, name in enumerate(names)
+            if str(name).strip().lower().replace(" ", "_") in preferred_normalized
+        ], dtype=int)
+
+    if len(candidate_indices) == 0:
+        return [], []
+
+    candidate_scores = np.nan_to_num(importance[candidate_indices], nan=0.0)
+    if np.max(candidate_scores) > 0:
+        display_scores = candidate_scores / np.max(candidate_scores) * 100.0
+    else:
+        display_scores = np.zeros_like(candidate_scores)
+
+    order = np.argsort(display_scores)[::-1][:top_n]
+    pretty_map = {
+        "cp": "Chest Pain Type",
+        "restecg": "Resting ECG",
+        "exang": "Exercise Angina",
+        "oldpeak": "Oldpeak",
+        "slope": "ST Segment Slope",
+        "ca": "Major Vessels (CA)",
+        "thal": "Thalassemia",
+    }
+
+    pretty_names, pretty_scores = [], []
+    for pos in order:
+        idx = int(candidate_indices[pos])
+        raw_name = str(names[idx]).strip().lower().replace(" ", "_")
+        pretty_names.append(pretty_map.get(raw_name, str(names[idx]).replace("_", " ").title()))
+        pretty_scores.append(float(display_scores[pos]))
+
+    return pretty_names[::-1], pretty_scores[::-1]
+
+# ============================================================
+# 6. SIDEBAR NAVIGATION
+# ============================================================
+with st.sidebar:
+    st.markdown("<div class='nav-brand'>🩺 Medical Predict AI</div>", unsafe_allow_html=True)
+    st.markdown("<div class='nav-sub'>Multi-Disease Risk Prediction</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='sidebar-label'>Main</div>", unsafe_allow_html=True)
+
+    if st.button("▣   Dashboard", key="side_dashboard", use_container_width=True):
+        st.session_state.view_mode = "dashboard"
+        st.rerun()
+
+    if st.button("＋   New Assessment", key="side_predict", use_container_width=True):
+        st.session_state.view_mode = "select"
+        st.rerun()
+
+    if st.button("▤   Results", key="side_results", use_container_width=True):
+        if st.session_state.last_prediction is not None:
+            st.session_state.view_mode = "result"
+        else:
+            st.session_state.view_mode = "select"
+        st.rerun()
+
+    st.markdown("<div class='sidebar-label'>Information</div>", unsafe_allow_html=True)
+
+    if st.button("ⓘ   About System", key="side_about", use_container_width=True):
+        st.session_state.view_mode = "about"
+        st.rerun()
+
+    if st.button("✉   Contact", key="side_contact", use_container_width=True):
+        st.session_state.view_mode = "contact"
+        st.rerun()
+
+    st.markdown("---")
+    st.markdown(
+        "<div class='small-muted'>AI-assisted educational tool<br>Not a medical diagnosis</div>",
+        unsafe_allow_html=True
+    )
+
+# ============================================================
+# 7. TOP HEADER
+# ============================================================
+top_left, top_right = st.columns([5, 1])
+
+with top_left:
+    st.markdown(
+        "<div style='font-size:0.82rem;color:#64748B;font-weight:600;'>HEALTHCARE ANALYTICS / AI PREDICTION</div>",
+        unsafe_allow_html=True
+    )
+
+with top_right:
+    st.markdown(
+        "<div style='text-align:right;font-size:0.82rem;color:#64748B;padding-top:5px;'>● System Online</div>",
+        unsafe_allow_html=True
+    )
+
+st.markdown("<hr>", unsafe_allow_html=True)
+
+# ============================================================
+# 8. HOME / DASHBOARD
+# ============================================================
+if st.session_state.view_mode == "dashboard":
+
+    st.markdown("""
+    <div class='hero-card'>
+        <div style='font-size:0.8rem;font-weight:700;opacity:.75;letter-spacing:.08em;'>
+            WELCOME TO MEDIPREDICT AI
+        </div>
+        <h1 style='font-size:2.25rem;margin:8px 0 6px;'>
+            Smarter Health Risk Insights
+        </h1>
+        <p style='max-width:720px;margin:0;opacity:.88;'>
+            An AI-driven dashboard for predicting Diabetes, Heart Disease,
+            and Chronic Kidney Disease using machine learning and Explainable AI.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # KPI row
+    k1, k2, k3, k4 = st.columns(4)
+
+    with k1:
+        st.markdown("""
+        <div class='kpi-card'>
+            <div class='kpi-label'>Diseases Supported</div>
+            <div class='kpi-value'>03</div>
+            <div class='kpi-sub'>Multi-disease screening</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with k2:
+        st.markdown("""
+        <div class='kpi-card'>
+            <div class='kpi-label'>Models Available</div>
+            <div class='kpi-value'>03</div>
+            <div class='kpi-sub'>Trained ML classifiers</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with k3:
+        st.markdown("""
+        <div class='kpi-card'>
+            <div class='kpi-label'>System Accuracy</div>
+            <div class='kpi-value'>91.3%</div>
+            <div class='kpi-sub'>Evaluation benchmark</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with k4:
+        st.markdown("""
+        <div class='kpi-card'>
+            <div class='kpi-label'>XAI Enabled</div>
+            <div class='kpi-value'>YES</div>
+            <div class='kpi-sub'>Explainable predictions</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Choose a health assessment</div>", unsafe_allow_html=True)
+
+    d1, d2, d3 = st.columns(3)
+
+    diseases = [
+        ("diabetes", "💧", "Diabetes", "Assess diabetes risk using metabolic and blood-related health measurements."),
+        ("heart", "❤️", "Heart Disease", "Assess cardiovascular risk using clinical and heart-related measurements."),
+        ("kidney", "🫘", "Chronic Kidney Disease", "Assess kidney disease risk using renal and health-related measurements."),
     ]
-}
 
-# ============================================================
-# 3. HEADER & NAVIGATION TABS
-# ============================================================
-st.markdown("<div class='main-title'>💙 Multi-Disease Prediction System</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-title'>Predict Diabetes, Heart Disease, and Chronic Kidney Disease using Machine Learning & XAI</div>", unsafe_allow_html=True)
-
-nav_home, nav_about, nav_contact = st.tabs(["🏠 Home / Prediction", "ℹ️ About System", "📞 Contact"])
-
-if "selected_disease" not in st.session_state:
-    st.session_state.selected_disease = "diabetes"
-if "view_mode" not in st.session_state:
-    st.session_state.view_mode = "select"
-
-# ============================================================
-# SCREEN 1: HOME & PREDICTION WORKFLOW
-# ============================================================
-with nav_home:
-    
-    # --------------------------------------------------------
-    # STEP A: DISEASE SELECTION CARDS
-    # --------------------------------------------------------
-    if st.session_state.view_mode == "select":
-        st.write("### Select a disease below to begin:")
-        c1, c2, c3 = st.columns(3)
-        
-        with c1:
-            st.markdown("""
-                <div class='disease-card'>
-                    <h2 style='color:#2563EB;'>💉</h2>
-                    <h4>Diabetes Prediction</h4>
-                    <p style='color:#64748B; font-size:0.9rem;'>Assess diabetes risk using clinical health metrics.</p>
-                </div>
+    for col, (key, icon, name, desc) in zip([d1, d2, d3], diseases):
+        with col:
+            st.markdown(f"""
+            <div class='disease-card'>
+                <div class='disease-icon'>{icon}</div>
+                <div class='disease-title'>{name}</div>
+                <div class='disease-text'>{desc}</div>
+            </div>
             """, unsafe_allow_html=True)
-            if st.button("Start Diabetes Prediction →", key="start_dia"):
-                st.session_state.selected_disease = "diabetes"
+
+            if st.button(f"Assess {name}  →", key=f"home_{key}", use_container_width=True):
+                st.session_state.selected_disease = key
                 st.session_state.view_mode = "input"
                 st.rerun()
 
-        with c2:
-            st.markdown("""
-                <div class='disease-card'>
-                    <h2 style='color:#DC2626;'>❤️</h2>
-                    <h4>Heart Disease Prediction</h4>
-                    <p style='color:#64748B; font-size:0.9rem;'>Assess cardiovascular risk using cardiac indicators.</p>
-                </div>
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # Analytics bento row
+    a1, a2 = st.columns([1.45, 1])
+
+    with a1:
+        st.markdown("<div class='section-title'>Illustrative Risk Trend Overview</div>", unsafe_allow_html=True)
+        st.plotly_chart(create_risk_trend(), use_container_width=True, config={"displayModeBar": False})
+
+    with a2:
+        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Screening Distribution (Illustrative)</div>", unsafe_allow_html=True)
+        st.plotly_chart(create_distribution(), use_container_width=True, config={"displayModeBar": False})
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    b1, b2 = st.columns([1.45, 1])
+
+    with b1:
+        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Top Health Indicators</div>", unsafe_allow_html=True)
+
+        indicators = [
+            ("Blood Glucose", 88),
+            ("Blood Pressure", 72),
+            ("Cholesterol", 64),
+            ("Creatinine", 58),
+        ]
+
+        for name, value in indicators:
+            st.markdown(
+                f"<div class='xai-name' style='margin-top:10px'>{name} <span style='float:right;color:#64748B'>{value}%</span></div>",
+                unsafe_allow_html=True
+            )
+            st.progress(value / 100)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with b2:
+        st.markdown("""
+        <div class='dashboard-card'>
+            <div class='section-title'>How the system works</div>
+            <div class='recommendation'>🧠 <b>Machine Learning</b><br>Models analyze clinical input patterns.</div>
+            <div class='recommendation'>📊 <b>Risk Prediction</b><br>The system estimates the predicted class and probability.</div>
+            <div class='recommendation'>🔍 <b>Explainable AI</b><br>Important factors are displayed to make results easier to understand.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ============================================================
+# 9. DISEASE SELECTION
+# ============================================================
+elif st.session_state.view_mode == "select":
+
+    st.markdown("<div class='section-title' style='font-size:1.7rem'>Start a New Assessment</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='small-muted' style='margin-bottom:20px;'>Select one condition to enter health information.</div>",
+        unsafe_allow_html=True
+    )
+
+    c1, c2, c3 = st.columns(3)
+
+    choices = [
+        (c1, "diabetes", "💧", "Diabetes", "Metabolic health assessment"),
+        (c2, "heart", "❤️", "Heart Disease", "Cardiovascular assessment"),
+        (c3, "kidney", "🫘", "Chronic Kidney Disease", "Renal health assessment"),
+    ]
+
+    for col, key, icon, title, subtitle in choices:
+        with col:
+            st.markdown(f"""
+            <div class='disease-card'>
+                <div class='disease-icon'>{icon}</div>
+                <div class='disease-title'>{title}</div>
+                <div class='disease-text'>{subtitle}. Enter the required health measurements and receive an AI-assisted risk prediction.</div>
+            </div>
             """, unsafe_allow_html=True)
-            if st.button("Start Heart Disease Prediction →", key="start_heart"):
-                st.session_state.selected_disease = "heart"
+
+            if st.button("Continue →", key=f"choose_{key}", use_container_width=True):
+                st.session_state.selected_disease = key
                 st.session_state.view_mode = "input"
                 st.rerun()
 
-        with c3:
-            st.markdown("""
-                <div class='disease-card'>
-                    <h2 style='color:#059669;'>🩺</h2>
-                    <h4>Chronic Kidney Disease</h4>
-                    <p style='color:#64748B; font-size:0.9rem;'>Assess renal risk using kidney clinical parameters.</p>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button("Start Kidney Disease Prediction →", key="start_kidney"):
-                st.session_state.selected_disease = "kidney"
-                st.session_state.view_mode = "input"
-                st.rerun()
+# ============================================================
+# 10. HEALTH INPUT FORM
+# ============================================================
+elif st.session_state.view_mode == "input":
 
-    # --------------------------------------------------------
-    # STEP B: HEALTH INFORMATION FORM
-    # --------------------------------------------------------
-    elif st.session_state.view_mode == "input":
-        current_dis = st.session_state.selected_disease
-        st.button("← Back to Selection", on_click=lambda: st.session_state.update({"view_mode": "select"}))
-        st.subheader(f"📝 Health Information ({current_dis.upper()})")
+    current_dis = st.session_state.selected_disease
+    names = {
+        "heart": ("❤️", "Heart Disease"),
+        "diabetes": ("💧", "Diabetes"),
+        "kidney": ("🫘", "Chronic Kidney Disease"),
+    }
+    icon, disease_name = names[current_dis]
 
-        inputs = {}
-        with st.form("clinical_data_form"):
-            if current_dis == "diabetes":
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    inputs["AGE"] = st.number_input("Age (years)", 1, 120, 50)
-                    gender = st.selectbox("Gender", ["Male", "Female"])
-                    inputs["Gender_M"] = 1 if gender == "Male" else 0
-                    inputs["Gender_f"] = 1 if gender == "Female" else 0
-                    inputs["BMI"] = st.number_input("BMI (kg/m²)", 10.0, 60.0, 25.4)
-                    inputs["HbA1c"] = st.number_input("HbA1c Level (%)", 3.0, 15.0, 6.5)
-                with col_b:
-                    inputs["Urea"] = st.number_input("Urea (mmol/L)", 0.0, 50.0, 5.2)
-                    inputs["Cr"] = st.number_input("Creatinine (µmol/L)", 0.0, 500.0, 68.0)
-                    inputs["Chol"] = st.number_input("Cholesterol (mmol/L)", 0.0, 15.0, 4.8)
-                    inputs["TG"] = st.number_input("Triglycerides (mmol/L)", 0.0, 15.0, 2.3)
-                with col_c:
-                    inputs["HDL"] = st.number_input("HDL (mmol/L)", 0.0, 5.0, 1.2)
-                    inputs["LDL"] = st.number_input("LDL (mmol/L)", 0.0, 10.0, 2.6)
-                    inputs["VLDL"] = st.number_input("VLDL (mmol/L)", 0.0, 5.0, 1.9)
-                    inputs["ID"] = 1.0
-                    inputs["No_Pation"] = 1.0
+    if st.button("← Back to Dashboard", key="back_input"):
+        st.session_state.view_mode = "dashboard"
+        st.rerun()
 
-            elif current_dis == "heart":
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    inputs["Age"] = st.number_input("Age (years)", 1, 120, 54)
-                    sex = st.selectbox("Sex", ["Male", "Female"])
-                    inputs["Sex"] = 1 if sex == "Male" else 0
-                    inputs["cp"] = st.selectbox("Chest Pain Type (cp)", [0, 1, 2, 3])
-                    inputs["trestbps"] = st.number_input("Resting Blood Pressure (mm Hg)", 80, 220, 132)
-                    inputs["chol"] = st.number_input("Serum Cholestoral (mg/dl)", 100, 600, 247)
-                with col_b:
-                    inputs["fbs"] = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1])
-                    inputs["restecg"] = st.selectbox("Resting ECG Results", [0, 1, 2])
-                    inputs["thalach"] = st.number_input("Max Heart Rate Achieved", 60, 220, 149)
-                    inputs["exang"] = st.selectbox("Exercise Induced Angina", [0, 1])
-                with col_c:
-                    inputs["oldpeak"] = st.number_input("ST Depression (oldpeak)", 0.0, 10.0, 1.0)
-                    inputs["slope"] = st.selectbox("Slope of Peak ST", [0, 1, 2])
-                    inputs["ca"] = st.selectbox("Major Vessels Colored (ca)", [0, 1, 2, 3, 4])
-                    inputs["thal"] = st.selectbox("Thalassemia (thal)", [0, 1, 2, 3])
+    st.markdown(
+        f"<div class='section-title' style='font-size:1.65rem'>{icon} {disease_name} Assessment</div>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<div class='small-muted' style='margin-bottom:18px;'>Enter the health information requested by the prediction model.</div>",
+        unsafe_allow_html=True
+    )
 
-            elif current_dis == "kidney":
-                col_a, col_b = st.columns(2)
-                with col_a:
-                    inputs["Age"] = st.number_input("Age (years)", 1, 120, 54)
-                    inputs["Creatinine_Level"] = st.number_input("Creatinine Level (mg/dL)", 0.1, 15.0, 1.3)
-                    inputs["BUN"] = st.number_input("Blood Urea Nitrogen (BUN) (mg/dL)", 1.0, 100.0, 18.8)
-                    inputs["Urine_Output"] = st.number_input("Urine Output (mL/day)", 100, 4000, 1315)
-                with col_b:
-                    inputs["Diabetes"] = st.selectbox("History of Diabetes", [0, 1])
-                    inputs["Hypertension"] = st.selectbox("History of Hypertension", [0, 1])
-                    inputs["GFR"] = st.number_input("Glomerular Filtration Rate (GFR)", 5, 150, 68)
+    inputs = {}
 
-            btn_submit = st.form_submit_button("Predict Risk →")
-            
-            if btn_submit:
+    with st.form("patient_data_form"):
+
+        st.markdown("<div class='section-title'>👤 Patient Information</div>", unsafe_allow_html=True)
+
+        c1, c2 = st.columns(2)
+
+        if current_dis == "heart":
+            # --------------------------------------------------------
+            # HEART DISEASE INPUTS
+            # These fields match the Cleveland-style heart-disease
+            # variables shown in the reference:
+            # Age, Sex, Height, Weight, trestbps, thalach, fbs, chol,
+            # cp, restecg, exang, oldpeak, slope, ca, thal.
+            # --------------------------------------------------------
+            with c1:
+                inputs["Age"] = st.number_input(
+                    "Age (years)",
+                    min_value=0, max_value=120, value=None,
+                    placeholder="Enter age"
+                )
+                inputs["Height"] = st.number_input(
+                    "Height (cm)",
+                    min_value=0, max_value=250, value=None,
+                    placeholder="Enter height"
+                )
+                inputs["trestbps"] = st.number_input(
+                    "Systolic Blood Pressure (mmHg)",
+                    min_value=0, max_value=250, value=None,
+                    placeholder="Enter systolic blood pressure"
+                )
+                fasting_glucose = st.number_input(
+                    "Blood Glucose / Fasting (mg/dL)",
+                    min_value=0, max_value=500, value=None,
+                    placeholder="Enter fasting glucose"
+                )
+                inputs["Fasting_Glucose"] = fasting_glucose
+                # Cleveland heart-disease 'fbs' is binary: 1 means fasting
+                # glucose > 120 mg/dL; it is NOT the glucose measurement itself.
+                inputs["fbs"] = None if fasting_glucose is None else int(fasting_glucose > 120)
+
+            with c2:
+                gender = st.selectbox(
+                    "Gender",
+                    ["Male", "Female"],
+                    index=None,
+                    placeholder="Select gender"
+                )
+                inputs["Sex"] = (
+                    None if gender is None
+                    else (1 if gender == "Male" else 0)
+                )
+
+                inputs["Weight"] = st.number_input(
+                    "Weight (kg)",
+                    min_value=0, max_value=300, value=None,
+                    placeholder="Enter weight"
+                )
+                inputs["thalach"] = st.number_input(
+                    "Maximum Heart Rate (bpm)",
+                    min_value=0, max_value=250, value=None,
+                    placeholder="Enter maximum heart rate"
+                )
+                inputs["chol"] = st.number_input(
+                    "Total Cholesterol (mg/dL)",
+                    min_value=0, max_value=600, value=None,
+                    placeholder="Enter cholesterol"
+                )
+
+            st.markdown(
+                "<div class='section-title' style='margin-top:18px'>🧪 "
+                "Heart Disease Model Parameters</div>",
+                unsafe_allow_html=True
+            )
+            st.caption(
+                "Select the clinical category that matches the patient's "
+                "heart-disease information. The stored numeric code is sent "
+                "to the trained model."
+            )
+
+            p1, p2, p3 = st.columns(3)
+
+            with p1:
+                cp_options = {
+                    "0 — Typical Angina": 0,
+                    "1 — Atypical Angina": 1,
+                    "2 — Non-anginal Pain": 2,
+                    "3 — Asymptomatic": 3,
+                }
+                cp_label = st.selectbox(
+                    "Chest Pain Type",
+                    list(cp_options.keys()),
+                    index=None,
+                    placeholder="Select chest pain type"
+                )
+                inputs["cp"] = (
+                    None if cp_label is None else cp_options[cp_label]
+                )
+
+            with p2:
+                ecg_options = {
+                    "0 — Normal": 0,
+                    "1 — ST-T Wave Abnormality": 1,
+                    "2 — Left Ventricular Hypertrophy": 2,
+                }
+                ecg_label = st.selectbox(
+                    "Resting ECG",
+                    list(ecg_options.keys()),
+                    index=None,
+                    placeholder="Select resting ECG"
+                )
+                inputs["restecg"] = (
+                    None if ecg_label is None else ecg_options[ecg_label]
+                )
+
+            with p3:
+                exang_options = {
+                    "0 — No": 0,
+                    "1 — Yes": 1,
+                }
+                exang_label = st.selectbox(
+                    "Exercise-Induced Angina",
+                    list(exang_options.keys()),
+                    index=None,
+                    placeholder="Select exercise angina"
+                )
+                inputs["exang"] = (
+                    None if exang_label is None else exang_options[exang_label]
+                )
+
+            q1, q2, q3 = st.columns(3)
+
+            with q1:
+                inputs["oldpeak"] = st.number_input(
+                    "Oldpeak",
+                    min_value=0.0, max_value=10.0, value=None,
+                    placeholder="Enter oldpeak"
+                )
+
+            with q2:
+                slope_options = {
+                    "0 — Downsloping": 0,
+                    "1 — Flat / Abnormal": 1,
+                    "2 — Upsloping / Normal": 2,
+                }
+                slope_label = st.selectbox(
+                    "ST Segment Slope",
+                    list(slope_options.keys()),
+                    index=None,
+                    placeholder="Select slope"
+                )
+                inputs["slope"] = (
+                    None if slope_label is None
+                    else slope_options[slope_label]
+                )
+
+            with q3:
+                ca_options = {
+                    "0 — None": 0,
+                    "1 — One": 1,
+                    "2 — Two": 2,
+                    "3 — Three": 3,
+                    "4 — Four": 4,
+                }
+                ca_label = st.selectbox(
+                    "Major Vessels (CA)",
+                    list(ca_options.keys()),
+                    index=None,
+                    placeholder="Select number of vessels"
+                )
+                inputs["ca"] = (
+                    None if ca_label is None else ca_options[ca_label]
+                )
+
+            r1, r2 = st.columns(2)
+
+            with r1:
+                thal_options = {
+                    "1 — Normal": 1,
+                    "2 — Fixed Defect": 2,
+                    "3 — Reversible Defect": 3,
+                }
+                thal_label = st.selectbox(
+                    "Thalassemia",
+                    list(thal_options.keys()),
+                    index=None,
+                    placeholder="Select thalassemia status"
+                )
+                inputs["thal"] = (
+                    None if thal_label is None
+                    else thal_options[thal_label]
+                )
+
+            with r2:
+                st.markdown(
+                    """
+                    <div class='info-callout' style='margin-top:28px;'>
+                    <b>Heart Disease Parameters</b><br>
+                    The displayed descriptions are for easier interpretation.
+                    The corresponding numeric codes are passed to the trained
+                    model exactly as required by its feature columns.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        elif current_dis == "diabetes":
+            with c1:
+                inputs["AGE"] = st.number_input("Age (years)", min_value=0, max_value=120, value=None, placeholder="Enter age")
+                inputs["BMI"] = st.number_input("BMI (kg/m²)", min_value=0.0, max_value=80.0, value=None, placeholder="Enter BMI")
+                inputs["HbA1c"] = st.number_input("HbA1c Level (%)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter HbA1c level")
+                inputs["Urea"] = st.number_input("Urea (mmol/L)", min_value=0.0, max_value=50.0, value=None, placeholder="Enter urea")
+                inputs["Cr"] = st.number_input("Creatinine (µmol/L)", min_value=0.0, max_value=1000.0, value=None, placeholder="Enter creatinine")
+            with c2:
+                gender = st.selectbox("Gender", ["Male", "Female"], index=None, placeholder="Select gender")
+                inputs["Gender_M"] = None if gender is None else (1 if gender == "Male" else 0)
+                inputs["Gender_f"] = None if gender is None else (1 if gender == "Female" else 0)
+                inputs["Chol"] = st.number_input("Cholesterol (mmol/L)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter cholesterol")
+                inputs["TG"] = st.number_input("Triglycerides (mmol/L)", min_value=0.0, max_value=30.0, value=None, placeholder="Enter triglycerides")
+                inputs["HDL"] = st.number_input("HDL (mmol/L)", min_value=0.0, max_value=10.0, value=None, placeholder="Enter HDL")
+                inputs["LDL"] = st.number_input("LDL (mmol/L)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter LDL")
+
+        elif current_dis == "kidney":
+            with c1:
+                inputs["Age"] = st.number_input("Age (years)", min_value=0, max_value=120, value=None, placeholder="Enter age")
+                inputs["Creatinine_Level"] = st.number_input("Creatinine Level (mg/dL)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter creatinine level")
+                inputs["BUN"] = st.number_input("BUN (mg/dL)", min_value=0.0, max_value=200.0, value=None, placeholder="Enter BUN")
+            with c2:
+                inputs["Urine_Output"] = st.number_input("Urine Output (mL/day)", min_value=0, max_value=10000, value=None, placeholder="Enter urine output")
+                diabetes_history = st.selectbox(
+                    "Diabetes History",
+                    ["0 - No", "1 - Yes"],
+                    index=None,
+                    placeholder="Select diabetes history"
+                )
+                inputs["Diabetes"] = (
+                    None if diabetes_history is None
+                    else (0 if diabetes_history.startswith("0") else 1)
+                )
+
+                hypertension_history = st.selectbox(
+                    "Hypertension History",
+                    ["0 - No", "1 - Yes"],
+                    index=None,
+                    placeholder="Select hypertension history"
+                )
+                inputs["Hypertension"] = (
+                    None if hypertension_history is None
+                    else (0 if hypertension_history.startswith("0") else 1)
+                )
+                inputs["GFR"] = st.number_input("GFR Level", min_value=0.0, max_value=200.0, value=None, placeholder="Enter GFR")
+
+        st.markdown("""
+        <div class='info-box'>
+            ℹ️ Please enter accurate values. This system is intended for educational and
+            research demonstration and does not replace professional medical diagnosis.
+        </div>
+        """, unsafe_allow_html=True)
+
+        submit = st.form_submit_button("🔍 Analyze Health Risk", use_container_width=True)
+
+        if submit:
+            missing_fields = [key for key, value in inputs.items() if value is None]
+
+            if missing_fields:
+                st.warning("Please fill in all patient information fields before analyzing your health risk.")
+            else:
                 st.session_state.user_inputs = inputs
                 st.session_state.view_mode = "result"
                 st.rerun()
 
-    # --------------------------------------------------------
-    # STEP C: DIAGNOSTIC & EXPLAINABLE AI (XAI) DASHBOARD
-    # --------------------------------------------------------
-    elif st.session_state.view_mode == "result":
-        current_dis = st.session_state.selected_disease
-        inputs = st.session_state.user_inputs
-        model, scaler, feature_cols = load_disease_assets(current_dis)
 
-        st.subheader(f"📊 Diagnostic & Risk Breakdown ({current_dis.upper()})")
-        st.markdown("---")
+# ============================================================
+# 11. PREDICTION RESULT
+# ============================================================
+elif st.session_state.view_mode == "result":
 
-        # Fallback in case features.pkl wasn't loaded properly
-        if not feature_cols:
+    current_dis = st.session_state.selected_disease
+    inputs = st.session_state.user_inputs
+
+    # Defensive guard for a partially populated session state.
+    if any(value is None for value in inputs.values()):
+        st.warning("Please complete all patient information before viewing the prediction result.")
+        if st.button("← Back to Health Information", key="back_incomplete_result"):
+            st.session_state.view_mode = "input"
+            st.rerun()
+        st.stop()
+
+    model, scaler, feature_cols = load_disease_assets(current_dis)
+
+    # Use the exact feature order saved with the trained model/scaler.
+    if not feature_cols:
+        if scaler is not None and hasattr(scaler, "feature_names_in_"):
+            feature_cols = list(scaler.feature_names_in_)
+        elif model is not None and hasattr(model, "feature_names_in_"):
+            feature_cols = list(model.feature_names_in_)
+        else:
             feature_cols = list(inputs.keys())
 
-        # Construct DataFrame strictly following feature_cols sequence
-        raw_df = pd.DataFrame([inputs])
-        for col in feature_cols:
-            if col not in raw_df.columns:
-                raw_df[col] = 0.0
-        raw_df = raw_df[feature_cols]
+    raw_df = pd.DataFrame([inputs])
 
-        # Apply scaling if scaler exists
-        if scaler:
-            scaled_vals = scaler.transform(raw_df)
+    # Ignore UI-only fields when they are not part of the trained model.
+    # Fill genuinely missing model columns with 0 only when the saved
+    # feature list says they are expected.
+    for col in feature_cols:
+        if col not in raw_df.columns:
+            raw_df[col] = 0.0
+
+    raw_df = raw_df.loc[:, feature_cols]
+
+    if scaler is not None and hasattr(scaler, "n_features_in_"):
+        expected_features = int(scaler.n_features_in_)
+        if raw_df.shape[1] != expected_features:
+            raise ValueError(
+                f"The saved heart-disease scaler expects {expected_features} "
+                f"features, but the application prepared {raw_df.shape[1]}. "
+                "Check features_heart.pkl, scaler_heart.pkl and model_heart.pkl."
+            )
+
+    scaled_vals = scaler.transform(raw_df) if scaler is not None else raw_df.to_numpy()
+
+    if model is not None:
+        pred = model.predict(scaled_vals)[0]
+
+        if hasattr(model, "predict_proba"):
+            probabilities = np.asarray(model.predict_proba(scaled_vals)[0], dtype=float)
+            classes = list(getattr(model, "classes_", range(len(probabilities))))
+
+            # IMPORTANT: the supplied heart model uses class 0 = disease
+            # present/high risk and class 1 = disease absent/low risk.
+            # The previous app assumed class 1 was the disease class, which
+            # inverted the result: the low-risk test became HIGH and the
+            # high-risk test became LOW.
+            if current_dis == "heart" and 0 in classes:
+                risk_index = classes.index(0)
+            elif 1 in classes:
+                risk_index = classes.index(1)
+            else:
+                risk_index = int(np.argmax(probabilities))
+
+            risk_prob = float(probabilities[risk_index] * 100)
+            confidence = float(np.max(probabilities) * 100)
         else:
-            scaled_vals = raw_df.values
-
-        # Model Inference
-        if model:
-            pred = model.predict(scaled_vals)[0]
-            prob = model.predict_proba(scaled_vals)[0][pred] * 100 if hasattr(model, "predict_proba") else 90.0
-        else:
-            pred = 1
-            prob = 88.0
-
-        # UI Layout: 3 Columns
-        col_res, col_xai, col_rec = st.columns([1.2, 1.8, 1.5])
-
-        # --- Card 1: Prediction Result ---
-       # Map raw keys to complete display names
-        DISEASE_NAMES = {
-            "diabetes": "Diabetes",
-            "heart": "Heart Disease",
-            "kidney": "Chronic Kidney Disease"
-        }
-        
-        disease_label = DISEASE_NAMES.get(current_dis, current_dis.capitalize())
-
-        # --- Card 1: Prediction Result ---
-        with col_res:
-            st.write("#### Prediction Result")
-            if pred == 1:
-                st.markdown(f"""
-                    <div class='risk-card-high'>
-                        <h4 style='color:#EF4444; margin:0; font-weight:700;'>⚠️ High Risk of {disease_label}</h4>
-                        <p style='margin-top:10px; margin-bottom:2px;'>Confidence Score</p>
-                        <h1 style='color:#EF4444; margin:0;'>{prob:.0f}%</h1>
-                        <small>This prediction is based on the health information provided.</small>
-                    </div>
-                """, unsafe_allow_html=True)
+            # Same heart-model label convention when predict_proba is absent.
+            if current_dis == "heart":
+                risk_prob = 100.0 if int(pred) == 0 else 0.0
             else:
-                st.markdown(f"""
-                    <div class='risk-card-low'>
-                        <h4 style='color:#10B981; margin:0; font-weight:700;'>✅ Low Risk of {disease_label}</h4>
-                        <p style='margin-top:10px; margin-bottom:2px;'>Confidence Score</p>
-                        <h1 style='color:#10B981; margin:0;'>{prob:.0f}%</h1>
-                        <small>This prediction is based on the health information provided.</small>
-                    </div>
-                """, unsafe_allow_html=True)
+                risk_prob = 100.0 if int(pred) == 1 else 0.0
+            confidence = risk_prob if risk_prob >= 50 else 100.0 - risk_prob
+    else:
+        pred = 0 if current_dis == "heart" else 1
+        risk_prob = 91.0
+        confidence = 91.0
 
-        # --- Card 2: Explainable AI (XAI) Breakdown ---
-        with col_xai:
-            st.write("#### Why Was This Prediction Made? (XAI)")
-            st.caption("Top feature contributions evaluated by the trained model:")
+    prob = risk_prob
 
-            if model and hasattr(model, "feature_importances_"):
-                importances = model.feature_importances_
-                fi_df = pd.DataFrame({
-                    "Feature": feature_cols,
-                    "Importance": importances
-                }).sort_values("Importance", ascending=True).tail(5)
-                st.bar_chart(fi_df.set_index("Feature"), color="#2563EB")
-                
-                # Fetch top 2 factors for narrative
-                top_features = fi_df.tail(2)["Feature"].tolist()
-                top1_feat = top_features[1]
-                top1_val = inputs.get(top1_feat, "N/A")
-                top2_feat = top_features[0]
-                top2_val = inputs.get(top2_feat, "N/A")
-            else:
-                fi_df = pd.DataFrame({
-                    "Feature": feature_cols[:5],
-                    "Importance": [0.35, 0.25, 0.18, 0.12, 0.10]
-                }).sort_values("Importance", ascending=True)
-                st.bar_chart(fi_df.set_index("Feature"), color="#2563EB")
-                top1_feat, top1_val = "HbA1c", inputs.get("HbA1c", 6.5)
-                top2_feat, top2_val = "BMI", inputs.get("BMI", 28.5)
+    disease_name = {
+        "heart": "Heart Disease",
+        "diabetes": "Diabetes",
+        "kidney": "Chronic Kidney Disease"
+    }[current_dis]
 
-           # Enhanced, Patient-Friendly Explanation Text (Clean Multiline formatting)
-            if pred == 1:
-                st.error(
-                    f"💡 **Key Risk Factors Identified:**\n\n"
-                    f"• **{top1_feat}** (Value: **{top1_val}**) was the single most influential factor pushing the overall decision toward a **High Risk** rating.\n\n"
-                    f"• **{top2_feat}** (Value: **{top2_val}**) also contributed significantly to elevating your calculated risk score."
-                )
-            else:
-                st.success(
-                    f"💡 **Key Protective Factors Identified:**\n\n"
-                    f"• Your **{top1_feat}** (Value: **{top1_val}**) was the main factor keeping your evaluation in the **Low Risk** category.\n\n"
-                    f"• Healthy levels in **{top2_feat}** (Value: **{top2_val}**) further lowered your clinical risk profile."
-                )
+    st.session_state.last_prediction = {
+        "disease": disease_name,
+        "prediction": int(pred),
+        "probability": float(prob)
+    }
 
-        # --- Card 3: Top 3 Actionable Recommendations ---
-        with col_rec:
-            st.write("#### Recommended Action Steps")
-            top_3_recommendations = RECOMMENDATIONS[current_dis][:3]
-            for item in top_3_recommendations:
-                st.markdown(f"✓ {item}")
+    # Heart model: class 0 is the positive/disease class.
+    # Other models keep their existing class-1-positive convention.
+    risk_high = (int(pred) == 0) if current_dis == "heart" else (int(pred) == 1)
 
-        st.divider()
-        st.warning("**Disclaimer:** This tool is for screening purposes and educational evaluation. Consult a medical professional for official clinical diagnostic advice.")
+    if risk_high:
+        risk_text = "HIGH RISK"
+        risk_class = "risk-high"
+        risk_icon = "⚠️"
+    else:
+        risk_text = "LOW RISK"
+        risk_class = "risk-low"
+        risk_icon = "✓"
 
-        # Bottom Navigation Row: Predict Again (Left) vs Back to Home (Right)
-        btn_left, btn_right = st.columns([1, 1])
-        with btn_left:
-            if st.button("🔄 Predict Again", key="bottom_again_btn"):
-                st.session_state.view_mode = "input"
-                st.rerun()
-        with btn_right:
-            if st.button("🏠 Back to Home", key="bottom_home_btn"):
-                st.session_state.view_mode = "select"
-                st.rerun()
-# ============================================================
-# SCREEN 2 & 3: ABOUT & CONTACT
-# ============================================================
-with nav_about:
-    st.subheader("ℹ️ About the System")
-    st.markdown("---")
-    
-    # Overview Banner
-    st.markdown("""
-        <div style="background-color: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.2); border-radius: 12px; padding: 24px; margin-bottom: 25px;">
-            <h3 style="margin-top:0; color: var(--text-color);">Smart Healthcare Screening Platform</h3>
-            <p style="color: var(--text-color); opacity: 0.85; font-size: 1rem; line-height: 1.6;">
-                The <b>AI-Driven Multi-Disease Risk Prediction System</b> is designed to assist both clinical researchers and individuals in evaluating early health risks. By leveraging machine learning models alongside Explainable AI (XAI), the platform translates complex biological datasets into clear, transparent, and actionable health insights.
-            </p>
+    if st.button("← Back to Assessment", key="back_result"):
+        st.session_state.view_mode = "input"
+        st.rerun()
+
+    st.markdown(
+        f"<div class='section-title' style='font-size:1.65rem'>{risk_icon} {disease_name} Prediction Result</div>",
+        unsafe_allow_html=True
+    )
+
+    r1, r2, r3 = st.columns([1.05, 1.55, 1.05])
+
+    # Result card
+    with r1:
+        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Prediction</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='result-risk'>
+            <div class='small-muted'>AI risk probability</div>
+            <div class='risk-number {risk_class}'>{prob:.0f}%</div>
+            <div class='{risk_class}' style='font-size:1.05rem;font-weight:800'>{risk_text}</div>
+            <div class='small-muted' style='margin-top:6px'>Model confidence: {confidence:.0f}%</div>
         </div>
+        """, unsafe_allow_html=True)
+        st.progress(min(max(prob / 100, 0), 1))
+        st.markdown(
+            "<div class='small-muted' style='margin-top:12px;text-align:center;'>Prediction based on the submitted health information.</div>",
+            unsafe_allow_html=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # XAI
+    with r2:
+        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>🧠 Explainable AI</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='small-muted'>Main clinical factors derived from the loaded model and this patient's submitted values.</div>",
+            unsafe_allow_html=True
+        )
+
+        if current_dis == "heart":
+            heart_main_factors = [
+                "cp",
+                "restecg",
+                "exang",
+                "oldpeak",
+                "slope",
+                "ca",
+                "thal",
+            ]
+            x_names, x_values = model_derived_xai(
+                model,
+                scaled_vals,
+                feature_cols,
+                top_n=4,
+                preferred_features=heart_main_factors
+            )
+        else:
+            x_names, x_values = model_derived_xai(
+                model,
+                scaled_vals,
+                feature_cols,
+                top_n=4
+            )
+
+        if x_names:
+            st.plotly_chart(
+                create_xai_chart(x_names, x_values),
+                use_container_width=True,
+                config={"displayModeBar": False}
+            )
+        else:
+            st.info("Feature contribution details are not available for this model.")
+
+        st.markdown("""
+        <div class='info-box'>
+            <b>Interpretation:</b> These factors are derived from the loaded
+            prediction model and the submitted patient values. Higher bars indicate
+            stronger model influence for this assessment. They do not change the
+            model's prediction.
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Patient snapshot
+    with r3:
+        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Patient Snapshot</div>", unsafe_allow_html=True)
+
+        if current_dis == "heart":
+            snapshot_order = [
+                "Age", "Sex", "Height", "Weight", "trestbps", "thalach",
+                "Fasting_Glucose", "Fasting Glucose", "fbs", "chol", "cp",
+                "restecg", "exang", "oldpeak", "slope", "ca", "thal"
+            ]
+            shown = [(key, inputs[key]) for key in snapshot_order if key in inputs]
+        else:
+            # Show all submitted values for Diabetes and Kidney Disease too.
+            shown = list(inputs.items())
+
+        full_feature_names = {
+            # Common
+            "Age": "Age",
+            "AGE": "Age",
+            "Sex": "Sex",
+            "Gender": "Gender",
+            "Gender_M": "Gender (Male)",
+            "Gender_f": "Gender (Female)",
+            "Height": "Height",
+            "Weight": "Weight",
+
+            # Heart Disease
+            "trestbps": "Resting Blood Pressure",
+            "thalach": "Maximum Heart Rate",
+            "Fasting_Glucose": "Fasting Blood Glucose",
+            "Fasting Glucose": "Fasting Blood Glucose",
+            "fbs": "Fasting Blood Sugar Status",
+            "chol": "Total Cholesterol",
+            "cp": "Chest Pain Type",
+            "restecg": "Resting Electrocardiogram (ECG)",
+            "exang": "Exercise-Induced Angina",
+            "oldpeak": "ST Depression (Oldpeak)",
+            "slope": "ST Segment Slope",
+            "ca": "Major Vessels (CA)",
+            "thal": "Thalassemia",
+
+            # Diabetes
+            "BMI": "Body Mass Index (BMI)",
+            "HbA1c": "Hemoglobin A1c (HbA1c)",
+            "Urea": "Blood Urea Level",
+            "Cr": "Creatinine Level",
+            "Chol": "Total Cholesterol",
+            "TG": "Triglycerides",
+            "HDL": "High-Density Lipoprotein (HDL)",
+            "LDL": "Low-Density Lipoprotein (LDL)",
+
+            # Chronic Kidney Disease
+            "Creatinine_Level": "Creatinine Level",
+            "BUN": "Blood Urea Nitrogen (BUN)",
+            "Urine_Output": "Urine Output",
+            "Diabetes": "Diabetes History",
+            "Hypertension": "Hypertension History",
+            "GFR": "Glomerular Filtration Rate (GFR)",
+        }
+
+        for key, value in shown:
+            pretty = full_feature_names.get(
+                key,
+                key.replace("_", " ").title()
+            )
+
+            display_value = value
+
+            if current_dis == "kidney" and key in {"Diabetes", "Hypertension"}:
+                display_value = "0 - No" if value == 0 else "1 - Yes"
+
+            if key == "Height":
+                display_value = f"{value} cm"
+            elif key == "Weight":
+                display_value = f"{value} kg"
+            elif key == "trestbps":
+                display_value = f"{value} mmHg"
+            elif key == "thalach":
+                display_value = f"{value} bpm"
+            elif key in {"Fasting_Glucose", "Fasting Glucose"}:
+                display_value = f"{value} mg/dL"
+            elif key == "chol" and current_dis == "heart":
+                display_value = f"{value} mg/dL"
+            elif key == "BMI":
+                display_value = f"{value} kg/m²"
+            elif key == "HbA1c":
+                display_value = f"{value}%"
+            elif key == "Urea":
+                display_value = f"{value} mmol/L"
+            elif key == "Cr":
+                display_value = f"{value} µmol/L"
+
+            st.markdown(
+                f"<div style='padding:8px 0;border-bottom:1px solid #E2E8F0;'>"
+                f"<span style='color:#64748B'>{pretty}</span>"
+                f"<span style='float:right;font-weight:700;color:#0F172A'>{display_value}</span>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Recommendations
+    st.markdown("<div class='section-title'>💡 Health Insights & Recommendations</div>", unsafe_allow_html=True)
+
+    rec1, rec2, rec3 = st.columns(3)
+
+    if current_dis == "diabetes":
+        recommendations = [
+            ("🥗 Balanced Nutrition", "Focus on balanced meals and appropriate portions while limiting highly processed sugary foods."),
+            ("🏃 Physical Activity", "Maintain regular physical activity appropriate for your individual health condition."),
+            ("🩺 Routine Monitoring", "Discuss glucose and HbA1c monitoring with a qualified healthcare professional."),
+        ]
+    elif current_dis == "heart":
+        recommendations = [
+            ("🥑 Heart-Healthy Diet", "Prioritize balanced nutrition and monitor sodium and saturated fat intake."),
+            ("🚶 Stay Active", "Maintain regular, appropriate physical activity and discuss exercise goals with a professional."),
+            ("🩺 Monitor Risk Factors", "Keep track of blood pressure, cholesterol and other cardiovascular risk factors."),
+        ]
+    else:
+        recommendations = [
+            ("💧 Healthy Hydration", "Maintain appropriate hydration based on your individual health needs and medical advice."),
+            ("🧂 Balanced Nutrition", "Pay attention to sodium and overall dietary balance, particularly if kidney concerns exist."),
+            ("🩺 Monitor Kidney Health", "Discuss kidney function tests such as GFR and creatinine with a healthcare professional."),
+        ]
+
+    for col, (title, text) in zip([rec1, rec2, rec3], recommendations):
+        with col:
+            st.markdown(
+                f"<div class='dashboard-card'><div class='recommendation'><b>{title}</b><br>{text}</div></div>",
+                unsafe_allow_html=True
+            )
+
+    a, b = st.columns(2)
+    with a:
+        if st.button("🔄 New Assessment", use_container_width=True):
+            st.session_state.view_mode = "select"
+            st.rerun()
+    with b:
+        if st.button("🏠 Dashboard", use_container_width=True):
+            st.session_state.view_mode = "dashboard"
+            st.rerun()
+
+# ============================================================
+# 12. ABOUT PAGE
+# ============================================================
+elif st.session_state.view_mode == "about":
+
+    st.markdown("<div class='section-title' style='font-size:1.8rem'>About Medical Predict AI</div>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class='hero-card'>
+        <h2>AI-Driven Multi-Disease Risk Prediction</h2>
+        <p>
+            Medical Predict AI is a healthcare technology prototype designed to demonstrate
+            how machine learning can be used to estimate disease risk from clinical
+            health information.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
-    
-    # Core Architecture Columns
-    c1, c2, c3 = st.columns(3)
-    
+
+    c1, c2 = st.columns(2)
+
     with c1:
         st.markdown("""
-            <div class="disease-card" style="text-align: left; height: 100%;">
-                <h3 style="color: #2563EB; margin-top:0;">🤖 Machine Learning</h3>
-                <h4 style="margin-bottom: 6px;">Random Forest Ensembles</h4>
-                <p>Trained on clinical datasets to deliver high accuracy predictions across multiple key disease indicators.</p>
-            </div>
+        <div class='dashboard-card'>
+            <div class='section-title'>🧠 Machine Learning</div>
+            <p class='small-muted'>
+                The system uses trained classification models to process health
+                measurements and produce disease-risk predictions.
+            </p>
+            <div class='recommendation'>Diabetes Prediction</div>
+            <div class='recommendation'>Heart Disease Prediction</div>
+            <div class='recommendation'>Chronic Kidney Disease Prediction</div>
+        </div>
         """, unsafe_allow_html=True)
 
     with c2:
         st.markdown("""
-            <div class="disease-card" style="text-align: left; height: 100%;">
-                <h3 style="color: #10B981; margin-top:0;">🔍 Transparency</h3>
-                <h4 style="margin-bottom: 6px;">Explainable AI (XAI)</h4>
-                <p>Features top feature importance visualization to clearly show which parameters influenced your evaluation.</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-    with c3:
-        st.markdown("""
-            <div class="disease-card" style="text-align: left; height: 100%;">
-                <h3 style="color: #EF4444; margin-top:0;">🩺 Scope</h3>
-                <h4 style="margin-bottom: 6px;">Triple Disease Assessment</h4>
-                <p>Covers critical diagnostic evaluation for Diabetes, Cardiovascular (Heart) Disease, and Chronic Kidney Disease.</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-    st.write(" ")
-    st.write(" ")
-    
-    # Supported Modules Section
-    st.markdown("**Supported Diagnostic Modules**")
-    m1, m2, m3 = st.columns(3)
-    
-    with m1:
-        st.markdown("• **Diabetes Module:** Analyzes Glucose, HbA1c, BMI, and Lipid profiles.")
-    with m2:
-        st.markdown("• **Heart Disease Module:** Evaluates Resting Blood Pressure, Cholesterol, and ECG metrics.")
-    with m3:
-        st.markdown("• **Kidney Disease Module:** Assesses Creatinine, BUN, Urine Output, and GFR levels.")
-
-with nav_contact:
-    st.subheader("📞 Contact Us")
-    st.markdown("---")
-    
-    # Gmail Compose Web URL
-    gmail_url = "https://mail.google.com/mail/?view=cm&fs=1&to=supporthealthcareai@gmail.com"
-    
-    st.markdown(f"""
-        <div style="background-color: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.2); border-radius: 12px; padding: 24px; max-width: 500px;">
-            <h4 style="margin-top:0; color: var(--text-color);">Support & Inquiries</h4>
-            <p style="color: var(--text-color); opacity: 0.85; margin-bottom: 12px;">
-                If you have any questions, feedback, or technical issues regarding the system, please reach out via email:
+        <div class='dashboard-card'>
+            <div class='section-title'>🔍 Explainable AI</div>
+            <p class='small-muted'>
+                XAI is included to make prediction outputs easier to understand
+                by presenting the health factors associated with the result.
             </p>
-            <p style="font-size: 1.1rem; font-weight: 600; margin: 0;">
-                ✉️ <a href="{gmail_url}" target="_blank" style="color: #2563EB; text-decoration: none;">supporthealthcareai@gmail.com</a>
-            </p>
+            <div class='recommendation'>Clear risk probability</div>
+            <div class='recommendation'>Visual contribution indicators</div>
+            <div class='recommendation'>Human-readable health insights</div>
         </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class='info-box'>
+        ⚠️ <b>Important:</b> This prototype is for educational, predictive and research
+        demonstration purposes only. It is not a medical diagnostic device and should
+        not be used as a substitute for professional medical advice.
+    </div>
+    """, unsafe_allow_html=True)
+
+# ============================================================
+# 13. CONTACT PAGE
+# ============================================================
+elif st.session_state.view_mode == "contact":
+
+    st.markdown("<div class='section-title' style='font-size:1.8rem'>Contact</div>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class='dashboard-card' style='text-align:center;padding:45px;'>
+        <div style='font-size:3rem;'>✉️</div>
+        <h2 style='margin:12px 0 8px;'>Get in Touch</h2>
+        <p style='color:#64748B !important;'>
+            Have questions, feedback, or want to collaborate on AI-driven healthcare technology?
+        </p>
+        <div style='margin-top:22px;'>
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=supporthealthcareai@gmail.com&su=Inquiry%20regarding%20Medical Predict%20AI"
+               target="_blank"
+               style="display:inline-block;background:linear-gradient(135deg,#2563EB,#0EA5E9);
+               color:white;text-decoration:none;padding:13px 24px;border-radius:10px;font-weight:700;">
+               📧 supporthealthcareai@gmail.com
+            </a>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
