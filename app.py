@@ -28,6 +28,18 @@ if "user_inputs" not in st.session_state:
 if "last_prediction" not in st.session_state:
     st.session_state.last_prediction = None
 
+# Theme is kept in dedicated session-state variables so navigation
+# buttons/reruns can never reset the selected theme.
+# The radio widget is initialized ONCE from the saved theme and then
+# becomes the source of truth for Light / Dark / Auto.
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = st.session_state.get("sidebar_theme", "Light")
+if "sidebar_theme_selector" not in st.session_state:
+    st.session_state.sidebar_theme_selector = st.session_state.theme_mode
+
+# Keep the legacy key synchronized for compatibility with existing code.
+st.session_state.sidebar_theme = st.session_state.theme_mode
+
 # ============================================================
 # 3. MODERN MEDICAL DASHBOARD DESIGN
 # ============================================================
@@ -527,261 +539,85 @@ div[role="listbox"] [role="option"][aria-selected="true"] * {
 
 
 /* ============================================================
-   CLEAN STREAMLIT SIDEBAR MENU / COLLAPSE BUTTON
-   Removes the accidentally visible "keyboard_double..." text
-   and makes the three-line menu control clearly visible.
+   SIDEBAR HAMBURGER — CLEAN SINGLE IMPLEMENTATION
+   The sidebar toggle is Streamlit's own button. We only restyle
+   the button; we do NOT hide its internal icon/text nodes.
+   This prevents raw Material-icon text from appearing.
    ============================================================ */
 
-/* Sidebar collapse button */
-[data-testid="stSidebarCollapseButton"] {
-    display: block !important;
+/* Sidebar closed: Streamlit's expand control.
+   Support current and older Streamlit selectors. */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stExpandSidebarButton"],
+button[data-testid="stExpandSidebarButton"],
+button[data-testid="stBaseButton-headerNoPadding"] {
     visibility: visible !important;
     opacity: 1 !important;
-    position: relative !important;
-    z-index: 99999 !important;
+    pointer-events: auto !important;
+    z-index: 999999 !important;
 }
 
-/* Make the button itself clean and visible */
-[data-testid="stSidebarCollapseButton"] button {
+/* Make the actual toggle button a fixed, compact hamburger button. */
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stExpandSidebarButton"] button,
+button[data-testid="stExpandSidebarButton"],
+button[data-testid="stBaseButton-headerNoPadding"] {
+    position: fixed !important;
+    top: 10px !important;
+    left: 16px !important;
     width: 42px !important;
     height: 42px !important;
     min-width: 42px !important;
     min-height: 42px !important;
-    padding: 8px !important;
-    margin: 6px !important;
-    border: none !important;
-    border-radius: 10px !important;
-    background: rgba(37, 99, 235, 0.95) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Remove any accidentally rendered Material Icon name */
-[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
-[data-testid="stSidebarCollapseButton"] button .material-icons,
-[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"] {
-    font-size: 0 !important;
-    width: 24px !important;
-    height: 24px !important;
-    color: transparent !important;
-}
-
-/* Draw a clean three-line hamburger icon */
-/* Clean hover state */
-[data-testid="stSidebarCollapseButton"] button:hover {
-    background: #1D4ED8 !important;
-    color: #FFFFFF !important;
-    transform: translateY(-1px);
-}
-
-/* Prevent the unwanted icon-name text from appearing anywhere
-   inside the sidebar collapse control */
-[data-testid="stSidebarCollapseButton"] button span {
-    color: transparent !important;
-    font-size: 0 !important;
-}
-
-
-
-
-/* ============================================================
-   CLEAN MENU BUTTON — ALL PAGES
-   Hide Streamlit's raw Material Icon name and show a clean
-   hamburger button even when the sidebar is collapsed.
-   ============================================================ */
-
-/* Hide raw Material icon glyph/name text in the collapse control */
-button[kind="headerNoPadding"],
-button[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapseButton"] button {
-    font-size: 0 !important;
-    color: transparent !important;
-    overflow: hidden !important;
-}
-
-/* Make the collapse button itself visible and clean */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapseButton"] button {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    min-height: 42px !important;
-    border-radius: 10px !important;
-    background: #2563EB !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,.15) !important;
-}
-
-/* Remove the broken keyboard_double... icon content */
-[data-testid="stSidebarCollapseButton"] button span,
-[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"],
-[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
-[data-testid="stSidebarCollapseButton"] button .material-icons {
-    display: none !important;
-    font-size: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-
-
-
-/* Hover */
-[data-testid="stSidebarCollapseButton"] button:hover {
-    background: #1D4ED8 !important;
-    color: #FFFFFF !important;
-}
-
-/* Hide any raw icon-name text accidentally rendered in the
-   top header area while keeping the actual header controls. */
-[data-testid="stHeader"] .material-symbols-outlined,
-[data-testid="stHeader"] .material-icons,
-[data-testid="stHeader"] [data-testid="stIconMaterial"] {
-    font-size: 0 !important;
-}
-
-/* Keep the Streamlit collapse button's icon replacement visible */
-/* ============================================================
-   FINAL SIDEBAR MENU VISIBILITY FIX
-   Keep the 3-line menu button blue and visible on every page/state.
-   ============================================================ */
-
-/* Streamlit header area */
-[data-testid="stHeader"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
     background: transparent !important;
-    z-index: 99999 !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: visible !important;
+    cursor: pointer !important;
 }
 
-/* Sidebar collapse control - all known Streamlit selectors */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapseButton"] > button,
-[data-testid="stSidebarCollapseButton"] button,
-button[data-testid="baseButton-headerNoPadding"],
-button[kind="headerNoPadding"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    border: 2px solid #2563EB !important;
-    border-radius: 10px !important;
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
-}
-
-/* Give the button a consistent clickable size */
-[data-testid="stSidebarCollapseButton"] button,
-button[data-testid="baseButton-headerNoPadding"],
-button[kind="headerNoPadding"] {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    min-height: 42px !important;
-    padding: 0 !important;
-    margin: 5px !important;
-}
-
-/* Hide Streamlit's raw material-icon name */
-[data-testid="stSidebarCollapseButton"] button span,
-[data-testid="stSidebarCollapseButton"] button .material-symbols-outlined,
-[data-testid="stSidebarCollapseButton"] button .material-icons,
-[data-testid="stSidebarCollapseButton"] button [data-testid="stIconMaterial"],
-button[data-testid="baseButton-headerNoPadding"] span,
-button[kind="headerNoPadding"] span {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
+/* Hide Streamlit's Material icon without hiding the button itself. */
+[data-testid="stSidebarCollapsedControl"] button span,
+[data-testid="stExpandSidebarButton"] button span,
+button[data-testid="stExpandSidebarButton"] span,
+button[data-testid="stBaseButton-headerNoPadding"] span {
     font-size: 0 !important;
     color: transparent !important;
+    line-height: 0 !important;
 }
 
-/* Our visible hamburger */
-/* Hover/focus */
-[data-testid="stSidebarCollapseButton"] button:hover,
-button[data-testid="baseButton-headerNoPadding"]:hover,
-button[kind="headerNoPadding"]:hover,
-[data-testid="stSidebarCollapseButton"] button:focus {
-    background: #1D4ED8 !important;
-    background-color: #1D4ED8 !important;
-    border-color: #1D4ED8 !important;
-    color: #FFFFFF !important;
-}
-
-/* Never allow the header control to become a white button */
-[data-testid="stHeader"] button {
-    color: #FFFFFF !important;
-}
-
-/* If the sidebar is collapsed, keep the control above the page content */
-section[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stAppViewContainer"] {
-    margin-left: 0 !important;
-}
-
-
-/* ============================================================
-   FINAL CLEAN HAMBURGER — ONE ICON ONLY
-   ============================================================ */
-[data-testid="stSidebarCollapseButton"] button,
-button[data-testid="baseButton-headerNoPadding"],
-button[kind="headerNoPadding"] {
-    position: relative !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    min-height: 42px !important;
-    padding: 0 !important;
-    margin: 5px !important;
-    border: none !important;
-    border-radius: 10px !important;
-    background: #2563EB !important;
-    color: transparent !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,.18) !important;
-}
-
-/* Hide ALL native icon/text inside the button */
-[data-testid="stSidebarCollapseButton"] button > *,
-button[data-testid="baseButton-headerNoPadding"] > *,
-button[kind="headerNoPadding"] > * {
-    display: none !important;
-}
-
-/* Three clean hamburger bars */
-[data-testid="stSidebarCollapseButton"] button::before,
-button[data-testid="baseButton-headerNoPadding"]::before,
-button[kind="headerNoPadding"]::before {
+/* Draw our own three lines. */
+[data-testid="stSidebarCollapsedControl"] button::before,
+[data-testid="stExpandSidebarButton"] button::before,
+button[data-testid="stExpandSidebarButton"]::before,
+button[data-testid="stBaseButton-headerNoPadding"]::before {
     content: "" !important;
     position: absolute !important;
     left: 10px !important;
-    top: 12px !important;
+    top: 11px !important;
     width: 22px !important;
     height: 3px !important;
     border-radius: 3px !important;
-    background: #FFFFFF !important;
-    box-shadow:
-        0 7px 0 #FFFFFF,
-        0 14px 0 #FFFFFF !important;
+    background: #0F2A5F !important;
+    box-shadow: 0 7px 0 #0F2A5F, 0 14px 0 #0F2A5F !important;
     display: block !important;
 }
 
-/* No second pseudo-element/icon */
-[data-testid="stSidebarCollapseButton"] button::after,
-button[data-testid="baseButton-headerNoPadding"]::after,
-button[kind="headerNoPadding"]::after {
-    content: none !important;
-    display: none !important;
+/* Small hover area. */
+[data-testid="stSidebarCollapsedControl"] button:hover,
+[data-testid="stExpandSidebarButton"] button:hover,
+button[data-testid="stExpandSidebarButton"]:hover,
+button[data-testid="stBaseButton-headerNoPadding"]:hover {
+    background: rgba(37, 99, 235, 0.08) !important;
 }
 
-/* Hover */
-[data-testid="stSidebarCollapseButton"] button:hover,
-button[data-testid="baseButton-headerNoPadding"]:hover,
-button[kind="headerNoPadding"]:hover {
-    background: #1D4ED8 !important;
-    border: none !important;
-}
-
-
-
-    /* ============================================================
+/* ============================================================
        PATIENT SNAPSHOT — BOLDER DARK-MODE TEXT
        ============================================================ */
     .patient-snapshot,
@@ -822,15 +658,11 @@ button[kind="headerNoPadding"]:hover {
     max-width: 300px !important;
 }
 
-[data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarCollapsedControl"] {
-    display: none !important;
-    visibility: hidden !important;
-}
-
 /* Hide Streamlit's top-right toolbar / Deploy area. */
+/* Keep the Streamlit header available so the collapsed-sidebar control can render. */
 [data-testid="stToolbar"] {
-    display: none !important;
+    display: flex !important;
+    visibility: visible !important;
 }
 
 /* Keep the sidebar content comfortably spaced like the reference. */
@@ -908,8 +740,8 @@ button[kind="headerNoPadding"]:hover {
 }
 
 
-/* Hide Streamlit's top-right Deploy/menu toolbar from the dashboard */
-[data-testid="stToolbar"] { display: none !important; }
+/* Keep header available for the sidebar toggle. */
+[data-testid="stToolbar"] { display: flex !important; visibility: visible !important; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -1276,7 +1108,16 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
 # THEME ENGINE
 # ============================================================
 def get_theme_mode():
-    return st.session_state.get("sidebar_theme", "Light")
+    # Use the dedicated theme state as the single source of truth.
+    return st.session_state.get("theme_mode", st.session_state.get("sidebar_theme", "Light"))
+
+def _save_theme_choice():
+    # The radio widget writes to sidebar_theme_selector.
+    # Copy it to the persistent theme state before Streamlit reruns.
+    selected = st.session_state.get("sidebar_theme_selector", "Light")
+    if selected in ("Light", "Dark"):
+        st.session_state.theme_mode = selected
+        st.session_state.sidebar_theme = selected
 
 def plot_text_color():
     return "#FFFFFF" if get_theme_mode() == "Dark" else "#0F172A"
@@ -1320,14 +1161,27 @@ with st.sidebar:
     # ------------------------------------------------------------
     st.markdown("<div class='sidebar-label'>System Settings</div>", unsafe_allow_html=True)
 
+    theme_options = ["Light", "Dark"]
+    current_theme = get_theme_mode()
+    if current_theme not in theme_options:
+        current_theme = "Light"
+
+    # Do NOT rebuild the radio from a default value on every rerun.
+    # Its session-state value is preserved when Dashboard/Results/etc.
+    # calls st.rerun(), including when Auto is selected.
     theme_choice = st.radio(
         "Theme",
-        ["Light", "Dark", "Auto"],
+        theme_options,
         horizontal=True,
-        index=0,
-        key="sidebar_theme",
+        key="sidebar_theme_selector",
+        on_change=_save_theme_choice,
         label_visibility="visible"
     )
+
+    # Keep the canonical theme state synchronized after the widget returns.
+    if theme_choice in theme_options:
+        st.session_state.theme_mode = theme_choice
+        st.session_state.sidebar_theme = theme_choice
 
     if theme_choice == "Dark":
         st.markdown(
@@ -1598,6 +1452,67 @@ if get_theme_mode() == "Dark":
             background: linear-gradient(180deg, #060B16 0%, #0D172A 100%) !important;
         }
 
+        /* Dashboard/page surfaces must stay dark after navigation reruns. */
+        [data-testid="stAppViewContainer"],
+        [data-testid="stMain"],
+        [data-testid="stMainBlockContainer"],
+        section.main,
+        .main {
+            background: #05070B !important;
+        }
+
+        .kpi-card,
+        .disease-card,
+        .dashboard-card {
+            background: #0B0F17 !important;
+            color: #F8FAFC !important;
+            border-color: #334155 !important;
+        }
+
+        .kpi-card *,
+        .disease-card *,
+        .dashboard-card *,
+        .section-title,
+        .disease-title,
+        .kpi-value,
+        .xai-name {
+            color: #F8FAFC !important;
+        }
+
+        .kpi-label,
+        .kpi-sub,
+        .disease-text,
+        .small-muted {
+            color: #CBD5E1 !important;
+        }
+
+        .recommendation {
+            background: #111827 !important;
+            color: #E2E8F0 !important;
+            border-color: #334155 !important;
+        }
+
+        /* Do not let the browser/Streamlit default light theme paint the main header. */
+        header[data-testid="stHeader"] {
+            background: #05070B !important;
+        }
+
+        /* Hamburger is white when the app's own Dark theme is selected. */
+        [data-testid="stSidebarCollapsedControl"] button::before,
+        [data-testid="stExpandSidebarButton"] button::before,
+        button[data-testid="stExpandSidebarButton"]::before,
+        button[data-testid="stBaseButton-headerNoPadding"]::before {
+            background: #FFFFFF !important;
+            box-shadow: 0 7px 0 #FFFFFF, 0 14px 0 #FFFFFF !important;
+        }
+
+        [data-testid="stSidebarCollapsedControl"] button:hover,
+        [data-testid="stExpandSidebarButton"] button:hover,
+        button[data-testid="stExpandSidebarButton"]:hover,
+        button[data-testid="stBaseButton-headerNoPadding"]:hover {
+            background: rgba(255,255,255,0.08) !important;
+        }
+
         [data-testid="stSidebar"] * {
             color: #E2E8F0 !important;
         }
@@ -1611,67 +1526,322 @@ if get_theme_mode() == "Dark":
 elif get_theme_mode() == "Auto":
     st.markdown("""
     <style>
-    @media (prefers-color-scheme: dark) {
-        /* High-contrast inputs */
-        div[data-baseweb="input"] > div,
-        div[data-baseweb="input"],
-        div[data-testid="stNumberInputContainer"],
-        div[data-testid="stNumberInputContainer"] > div,
-        input, textarea,
-        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-            background: #FFFFFF !important;
-            background-color: #FFFFFF !important;
-            color: #0F172A !important;
-            -webkit-text-fill-color: #0F172A !important;
-            border-color: #CBD5E1 !important;
-        }
+        /* ============================================================
+           AUTO MODE
+           ============================================================
+           Auto is an exact visual copy of the existing themes:
+             - Auto + Light device/browser = original Light theme
+             - Auto + Dark device/browser  = original Dark theme
 
-        [role="listbox"],
-        [role="option"],
-        [data-baseweb="menu"],
-        [data-baseweb="popover"] {
-            background: #FFFFFF !important;
-            color: #0F172A !important;
-        }
+           Only the browser/OS dark media query activates the Dark CSS.
+           This prevents Auto from having a third, different design.
+           ============================================================ */
 
-        [role="option"]:hover,
-        [role="option"][aria-selected="true"] {
-            background: #2563EB !important;
-            color: #FFFFFF !important;
-        }
+        @media (prefers-color-scheme: dark) {
 
-        /* High-contrast Plotly labels */
-        .js-plotly-plot svg text,
-        .js-plotly-plot .xtick text,
-        .js-plotly-plot .ytick text,
-        .js-plotly-plot .legend text,
-        .js-plotly-plot .annotation-text,
-        .js-plotly-plot .axis-title {
-            fill: #F8FAFC !important;
-            color: #F8FAFC !important;
-        }
+                    /* ============================================================
+                       DARK MODE — HIGH CONTRAST
+                       ============================================================ */
 
-        .js-plotly-plot .xgrid,
-        .js-plotly-plot .ygrid {
-            stroke: #475569 !important;
-        }
+                    /* Main application */
+                    .stApp,
+                    [data-testid="stAppViewContainer"],
+                    .main,
+                    section.main {
+                        background: #05070B !important;
+                    }
 
-        .stApp, [data-testid="stAppViewContainer"], .main, section.main { background: #05070B !important; }
-        h1, h2, h3, h4, h5, h6, p, label, span, div, li { color: #F8FAFC !important; }
-        .dashboard-card, .kpi-card, .disease-card, .stTabs [data-baseweb="tab-list"], .recommendation {
-            background: #0B0F17 !important; border-color: #273244 !important; color: #F8FAFC !important;
+                    /* Main readable text */
+                    h1, h2, h3, h4, h5, h6,
+                    p, label, li,
+                    [data-testid="stWidgetLabel"] p,
+                    [data-testid="stMarkdownContainer"] p {
+                        color: #F8FAFC !important;
+                    }
+
+                    .small-muted,
+                    .nav-sub,
+                    .kpi-label,
+                    .kpi-sub,
+                    .disease-text,
+                    .xai-name,
+                    .sidebar-label,
+                    .stCaption {
+                        color: #CBD5E1 !important;
+                    }
+
+                    .section-title,
+                    .disease-title,
+                    .kpi-value {
+                        color: #FFFFFF !important;
+                    }
+
+                    /* Cards */
+                    .dashboard-card,
+                    .kpi-card,
+                    .disease-card,
+                    .stTabs [data-baseweb="tab-list"],
+                    .stExpander,
+                    [data-testid="stMetric"],
+                    .recommendation {
+                        background: #0B0F17 !important;
+                        border-color: #334155 !important;
+                        color: #F8FAFC !important;
+                        box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+                    }
+
+                    .disease-icon {
+                        background: #111827 !important;
+                    }
+
+                    /* ============================================================
+                       INPUTS — WHITE IN BOTH LIGHT AND DARK MODE
+                       ============================================================ */
+                    div[data-baseweb="input"] > div,
+                    div[data-baseweb="input"],
+                    div[data-testid="stNumberInputContainer"],
+                    div[data-testid="stNumberInputContainer"] > div {
+                        background: #FFFFFF !important;
+                        background-color: #FFFFFF !important;
+                        border-color: #CBD5E1 !important;
+                        color: #0F172A !important;
+                    }
+
+                    input,
+                    textarea {
+                        background: #FFFFFF !important;
+                        background-color: #FFFFFF !important;
+                        color: #0F172A !important;
+                        -webkit-text-fill-color: #0F172A !important;
+                        caret-color: #2563EB !important;
+                    }
+
+                    input::placeholder,
+                    textarea::placeholder {
+                        color: #64748B !important;
+                        -webkit-text-fill-color: #64748B !important;
+                        opacity: 1 !important;
+                    }
+
+                    /* Number-input +/- controls */
+                    div[data-testid="stNumberInput"] button,
+                    div[data-testid="stNumberInputContainer"] button {
+                        background: #2563EB !important;
+                        color: #FFFFFF !important;
+                        border-color: #2563EB !important;
+                    }
+
+                    /* ============================================================
+                       DROPDOWNS — WHITE WITH BLACK TEXT
+                       ============================================================ */
+                    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+                    div[data-testid="stSelectbox"] div[data-baseweb="select"],
+                    div[data-baseweb="select"] > div {
+                        background: #FFFFFF !important;
+                        background-color: #FFFFFF !important;
+                        border-color: #CBD5E1 !important;
+                        color: #0F172A !important;
+                    }
+
+                    div[data-testid="stSelectbox"] input {
+                        background: #FFFFFF !important;
+                        color: #0F172A !important;
+                        -webkit-text-fill-color: #0F172A !important;
+                    }
+
+                    /* Open dropdown menu */
+                    [data-baseweb="popover"],
+                    [data-baseweb="menu"],
+                    [role="listbox"],
+                    [role="option"] {
+                        background: #FFFFFF !important;
+                        color: #0F172A !important;
+                    }
+
+                    [role="option"] {
+                        color: #0F172A !important;
+                    }
+
+                    [role="option"]:hover,
+                    [role="option"][aria-selected="true"] {
+                        background: #2563EB !important;
+                        color: #FFFFFF !important;
+                    }
+
+                    /* Dropdown icons */
+                    div[data-testid="stSelectbox"] svg {
+                        fill: #2563EB !important;
+                        color: #2563EB !important;
+                    }
+
+                    /* ============================================================
+                       CHARTS — FORCE ALL LABELS/TEXT TO BE BRIGHT
+                       ============================================================ */
+                    .js-plotly-plot,
+                    .plotly,
+                    .plot-container {
+                        color: #FFFFFF !important;
+                    }
+
+                    .js-plotly-plot svg text,
+                    .js-plotly-plot .xtick text,
+                    .js-plotly-plot .ytick text,
+                    .js-plotly-plot .gtitle text,
+                    .js-plotly-plot .legend text,
+                    .js-plotly-plot .annotation-text,
+                    .js-plotly-plot .axis-title {
+                        fill: #F8FAFC !important;
+                        color: #F8FAFC !important;
+                    }
+
+                    .js-plotly-plot .xaxislayer-above text,
+                    .js-plotly-plot .yaxislayer-above text,
+                    .js-plotly-plot .legendtext {
+                        fill: #F8FAFC !important;
+                    }
+
+                    .js-plotly-plot .xgrid,
+                    .js-plotly-plot .ygrid {
+                        stroke: #475569 !important;
+                    }
+
+                    .js-plotly-plot .zerolinelayer path,
+                    .js-plotly-plot .xaxislayer-above path,
+                    .js-plotly-plot .yaxislayer-above path {
+                        stroke: #64748B !important;
+                    }
+
+                    /* Plotly hover text */
+                    .js-plotly-plot .hovertext text,
+                    .js-plotly-plot .axistext {
+                        fill: #FFFFFF !important;
+                    }
+
+                    /* ============================================================
+                       INFO / RECOMMENDATION BOXES
+                       ============================================================ */
+                    .info-box {
+                        background: #0B1B35 !important;
+                        border-color: #2563EB !important;
+                        color: #E0F2FE !important;
+                    }
+
+                    .info-box *,
+                    .recommendation * {
+                        color: inherit !important;
+                    }
+
+                    .recommendation {
+                        background: #111827 !important;
+                        border-color: #334155 !important;
+                        color: #E2E8F0 !important;
+                    }
+
+                    /* Tabs */
+                    .stTabs [data-baseweb="tab-list"] {
+                        background: #0B0F17 !important;
+                        border-color: #334155 !important;
+                    }
+
+                    .stTabs [data-baseweb="tab"] {
+                        color: #CBD5E1 !important;
+                    }
+
+                    .stTabs [aria-selected="true"] {
+                        color: #FFFFFF !important;
+                    }
+
+                    /* Alerts */
+                    [data-testid="stAlert"] {
+                        background: #111827 !important;
+                        color: #F8FAFC !important;
+                        border-color: #334155 !important;
+                    }
+
+                    [data-testid="stAlert"] * {
+                        color: #F8FAFC !important;
+                    }
+
+                    hr {
+                        border-color: #334155 !important;
+                    }
+
+                    /* Sidebar stays navy */
+                    [data-testid="stSidebar"] {
+                        background: linear-gradient(180deg, #060B16 0%, #0D172A 100%) !important;
+                    }
+
+                    /* Dashboard/page surfaces must stay dark after navigation reruns. */
+                    [data-testid="stAppViewContainer"],
+                    [data-testid="stMain"],
+                    [data-testid="stMainBlockContainer"],
+                    section.main,
+                    .main {
+                        background: #05070B !important;
+                    }
+
+                    .kpi-card,
+                    .disease-card,
+                    .dashboard-card {
+                        background: #0B0F17 !important;
+                        color: #F8FAFC !important;
+                        border-color: #334155 !important;
+                    }
+
+                    .kpi-card *,
+                    .disease-card *,
+                    .dashboard-card *,
+                    .section-title,
+                    .disease-title,
+                    .kpi-value,
+                    .xai-name {
+                        color: #F8FAFC !important;
+                    }
+
+                    .kpi-label,
+                    .kpi-sub,
+                    .disease-text,
+                    .small-muted {
+                        color: #CBD5E1 !important;
+                    }
+
+                    .recommendation {
+                        background: #111827 !important;
+                        color: #E2E8F0 !important;
+                        border-color: #334155 !important;
+                    }
+
+                    /* Do not let the browser/Streamlit default light theme paint the main header. */
+                    header[data-testid="stHeader"] {
+                        background: #05070B !important;
+                    }
+
+                    /* Hamburger is white when the app's own Dark theme is selected. */
+                    [data-testid="stSidebarCollapsedControl"] button::before,
+                    [data-testid="stExpandSidebarButton"] button::before,
+                    button[data-testid="stExpandSidebarButton"]::before,
+                    button[data-testid="stBaseButton-headerNoPadding"]::before {
+                        background: #FFFFFF !important;
+                        box-shadow: 0 7px 0 #FFFFFF, 0 14px 0 #FFFFFF !important;
+                    }
+
+                    [data-testid="stSidebarCollapsedControl"] button:hover,
+                    [data-testid="stExpandSidebarButton"] button:hover,
+                    button[data-testid="stExpandSidebarButton"]:hover,
+                    button[data-testid="stBaseButton-headerNoPadding"]:hover {
+                        background: rgba(255,255,255,0.08) !important;
+                    }
+
+                    [data-testid="stSidebar"] * {
+                        color: #E2E8F0 !important;
+                    }
+
+                    /* Theme selector */
+                    [data-testid="stRadio"] label {
+                        color: #E2E8F0 !important;
+                    }
+    
         }
-        .disease-icon { background: #111827 !important; }
-        .disease-title, .section-title, .kpi-value { color: #F8FAFC !important; }
-        div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, div[data-testid="stNumberInputContainer"], input, textarea {
-            background: #111827 !important; background-color: #111827 !important; color: #F8FAFC !important; -webkit-text-fill-color: #F8FAFC !important; border-color: #334155 !important;
-        }
-        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div { background: #2563EB !important; background-color: #2563EB !important; }
-        .info-box { background: #0B1B35 !important; border-color: #1D4ED8 !important; color: #BFDBFE !important; }
-        .recommendation { background: #111827 !important; border-color: #273244 !important; }
-        hr { border-color: #273244 !important; }
-        [data-testid="stSidebar"] { background: linear-gradient(180deg, #060B16 0%, #0D172A 100%) !important; }
-    }
     </style>
     """, unsafe_allow_html=True)
 
