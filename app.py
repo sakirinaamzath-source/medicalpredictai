@@ -390,6 +390,35 @@ div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] > div {
     box-shadow: none !important;
 }
 
+
+/* Functional clear (×) controls for all number inputs.
+   These are form-submit buttons because st.button() is forbidden inside st.form(). */
+.clear-number-spacer { height: 27px; }
+div[data-testid="stFormSubmitButton"] button[kind="secondary"] {
+    width: 100% !important;
+    min-width: 34px !important;
+    height: 38px !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    line-height: 38px !important;
+}
+div[data-testid="stFormSubmitButton"] button[kind="secondary"] p {
+    color: #FFFFFF !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+div[data-testid="stFormSubmitButton"] button[kind="secondary"]:hover {
+    background: #1D4ED8 !important;
+}
+
 /* Blue +/- buttons */
 div[data-testid="stNumberInput"] button,
 div[data-testid="stNumberInputContainer"] button,
@@ -1107,6 +1136,44 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
 # ============================================================
 # THEME ENGINE
 # ============================================================
+
+
+def _clear_number_input(key):
+    """Clear a number-input widget from a form-submit callback."""
+    st.session_state[key] = None
+
+def clearable_number_input(label, *, key, min_value=None, max_value=None, value=None, placeholder=None, step=None):
+    """Number input with a functional × clear control that is form-safe.
+
+    Streamlit does not allow st.button() inside st.form(). Therefore the clear
+    control is implemented as a form_submit_button with a callback. The callback
+    clears only this widget's session-state value; it does not trigger analysis.
+    """
+    left, right = st.columns([0.94, 0.06], gap="small")
+    with left:
+        kwargs = {
+            "min_value": min_value,
+            "max_value": max_value,
+            "value": value,
+            "placeholder": placeholder,
+            "key": key,
+        }
+        if step is not None:
+            kwargs["step"] = step
+        result = st.number_input(label, **kwargs)
+
+    with right:
+        st.markdown("<div class='clear-number-spacer'></div>", unsafe_allow_html=True)
+        st.form_submit_button(
+            "×",
+            key=f"{key}__clear",
+            help=f"Clear {label}",
+            type="secondary",
+            on_click=_clear_number_input,
+            args=(key,),
+        )
+    return result
+
 def get_theme_mode():
     # Use the dedicated theme state as the single source of truth.
     return st.session_state.get("theme_mode", st.session_state.get("sidebar_theme", "Light"))
@@ -1186,11 +1253,6 @@ with st.sidebar:
     if theme_choice == "Dark":
         st.markdown(
             "<div class='small-muted'>Dark theme selected. Restart the app if the browser theme does not update immediately.</div>",
-            unsafe_allow_html=True
-        )
-    elif theme_choice == "Auto":
-        st.markdown(
-            "<div class='small-muted'>Auto follows your system preference.</div>",
             unsafe_allow_html=True
         )
 
@@ -2073,23 +2135,23 @@ elif st.session_state.view_mode == "input":
             # cp, restecg, exang, oldpeak, slope, ca, thal.
             # --------------------------------------------------------
             with c1:
-                inputs["Age"] = st.number_input(
-                    "Age (years)",
+                inputs["Age"] = clearable_number_input(
+                    "Age (years)", key="heart_age",
                     min_value=0, max_value=120, value=None,
                     placeholder="Enter age"
                 )
-                inputs["Height"] = st.number_input(
-                    "Height (cm)",
+                inputs["Height"] = clearable_number_input(
+                    "Height (cm)", key="heart_height",
                     min_value=0, max_value=250, value=None,
                     placeholder="Enter height"
                 )
-                inputs["trestbps"] = st.number_input(
-                    "Systolic Blood Pressure (mmHg)",
+                inputs["trestbps"] = clearable_number_input(
+                    "Systolic Blood Pressure (mmHg)", key="heart_trestbps",
                     min_value=0, max_value=250, value=None,
                     placeholder="Enter systolic blood pressure"
                 )
-                fasting_glucose = st.number_input(
-                    "Blood Glucose / Fasting (mg/dL)",
+                fasting_glucose = clearable_number_input(
+                    "Blood Glucose / Fasting (mg/dL)", key="heart_fasting_glucose",
                     min_value=0, max_value=500, value=None,
                     placeholder="Enter fasting glucose"
                 )
@@ -2110,18 +2172,18 @@ elif st.session_state.view_mode == "input":
                     else (1 if gender == "Male" else 0)
                 )
 
-                inputs["Weight"] = st.number_input(
-                    "Weight (kg)",
+                inputs["Weight"] = clearable_number_input(
+                    "Weight (kg)", key="heart_weight",
                     min_value=0, max_value=300, value=None,
                     placeholder="Enter weight"
                 )
-                inputs["thalach"] = st.number_input(
-                    "Maximum Heart Rate (bpm)",
+                inputs["thalach"] = clearable_number_input(
+                    "Maximum Heart Rate (bpm)", key="heart_thalach",
                     min_value=0, max_value=250, value=None,
                     placeholder="Enter maximum heart rate"
                 )
-                inputs["chol"] = st.number_input(
-                    "Total Cholesterol (mg/dL)",
+                inputs["chol"] = clearable_number_input(
+                    "Total Cholesterol (mg/dL)", key="heart_chol",
                     min_value=0, max_value=600, value=None,
                     placeholder="Enter cholesterol"
                 )
@@ -2190,8 +2252,8 @@ elif st.session_state.view_mode == "input":
             q1, q2, q3 = st.columns(3)
 
             with q1:
-                inputs["oldpeak"] = st.number_input(
-                    "Oldpeak",
+                inputs["oldpeak"] = clearable_number_input(
+                    "Oldpeak", key="heart_oldpeak",
                     min_value=0.0, max_value=10.0, value=None,
                     placeholder="Enter oldpeak"
                 )
@@ -2265,27 +2327,27 @@ elif st.session_state.view_mode == "input":
 
         elif current_dis == "diabetes":
             with c1:
-                inputs["AGE"] = st.number_input("Age (years)", min_value=0, max_value=120, value=None, placeholder="Enter age")
-                inputs["BMI"] = st.number_input("BMI (kg/m²)", min_value=0.0, max_value=80.0, value=None, placeholder="Enter BMI")
-                inputs["HbA1c"] = st.number_input("HbA1c Level (%)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter HbA1c level")
-                inputs["Urea"] = st.number_input("Urea (mmol/L)", min_value=0.0, max_value=50.0, value=None, placeholder="Enter urea")
-                inputs["Cr"] = st.number_input("Creatinine (µmol/L)", min_value=0.0, max_value=1000.0, value=None, placeholder="Enter creatinine")
+                inputs["AGE"] = clearable_number_input("Age (years)", key="diabetes_age", min_value=0, max_value=120, value=None, placeholder="Enter age")
+                inputs["BMI"] = clearable_number_input("BMI (kg/m²)", key="diabetes_bmi", min_value=0.0, max_value=80.0, value=None, placeholder="Enter BMI")
+                inputs["HbA1c"] = clearable_number_input("HbA1c Level (%)", key="diabetes_hba1c", min_value=0.0, max_value=20.0, value=None, placeholder="Enter HbA1c level")
+                inputs["Urea"] = clearable_number_input("Urea (mmol/L)", key="diabetes_urea", min_value=0.0, max_value=50.0, value=None, placeholder="Enter urea")
+                inputs["Cr"] = clearable_number_input("Creatinine (µmol/L)", key="diabetes_cr", min_value=0.0, max_value=1000.0, value=None, placeholder="Enter creatinine")
             with c2:
                 gender = st.selectbox("Gender", ["Male", "Female"], index=None, placeholder="Select gender")
                 inputs["Gender_M"] = None if gender is None else (1 if gender == "Male" else 0)
                 inputs["Gender_f"] = None if gender is None else (1 if gender == "Female" else 0)
-                inputs["Chol"] = st.number_input("Cholesterol (mmol/L)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter cholesterol")
-                inputs["TG"] = st.number_input("Triglycerides (mmol/L)", min_value=0.0, max_value=30.0, value=None, placeholder="Enter triglycerides")
-                inputs["HDL"] = st.number_input("HDL (mmol/L)", min_value=0.0, max_value=10.0, value=None, placeholder="Enter HDL")
-                inputs["LDL"] = st.number_input("LDL (mmol/L)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter LDL")
+                inputs["Chol"] = clearable_number_input("Cholesterol (mmol/L)", key="diabetes_chol", min_value=0.0, max_value=20.0, value=None, placeholder="Enter cholesterol")
+                inputs["TG"] = clearable_number_input("Triglycerides (mmol/L)", key="diabetes_tg", min_value=0.0, max_value=30.0, value=None, placeholder="Enter triglycerides")
+                inputs["HDL"] = clearable_number_input("HDL (mmol/L)", key="diabetes_hdl", min_value=0.0, max_value=10.0, value=None, placeholder="Enter HDL")
+                inputs["LDL"] = clearable_number_input("LDL (mmol/L)", key="diabetes_ldl", min_value=0.0, max_value=20.0, value=None, placeholder="Enter LDL")
 
         elif current_dis == "kidney":
             with c1:
-                inputs["Age"] = st.number_input("Age (years)", min_value=0, max_value=120, value=None, placeholder="Enter age")
-                inputs["Creatinine_Level"] = st.number_input("Creatinine Level (mg/dL)", min_value=0.0, max_value=20.0, value=None, placeholder="Enter creatinine level")
-                inputs["BUN"] = st.number_input("BUN (mg/dL)", min_value=0.0, max_value=200.0, value=None, placeholder="Enter BUN")
+                inputs["Age"] = clearable_number_input("Age (years)", key="kidney_age", min_value=0, max_value=120, value=None, placeholder="Enter age")
+                inputs["Creatinine_Level"] = clearable_number_input("Creatinine Level (mg/dL)", key="kidney_creatinine", min_value=0.0, max_value=20.0, value=None, placeholder="Enter creatinine level")
+                inputs["BUN"] = clearable_number_input("BUN (mg/dL)", key="kidney_bun", min_value=0.0, max_value=200.0, value=None, placeholder="Enter BUN")
             with c2:
-                inputs["Urine_Output"] = st.number_input("Urine Output (mL/day)", min_value=0, max_value=10000, value=None, placeholder="Enter urine output")
+                inputs["Urine_Output"] = clearable_number_input("Urine Output (mL/day)", key="kidney_urine_output", min_value=0, max_value=10000, value=None, placeholder="Enter urine output")
                 diabetes_history = st.selectbox(
                     "Diabetes History",
                     ["0 - No", "1 - Yes"],
@@ -2307,7 +2369,7 @@ elif st.session_state.view_mode == "input":
                     None if hypertension_history is None
                     else (0 if hypertension_history.startswith("0") else 1)
                 )
-                inputs["GFR"] = st.number_input("GFR Level", min_value=0.0, max_value=200.0, value=None, placeholder="Enter GFR")
+                inputs["GFR"] = clearable_number_input("GFR Level", key="kidney_gfr", min_value=0.0, max_value=200.0, value=None, placeholder="Enter GFR")
 
         st.markdown("""
         <div class='info-box'>
@@ -2756,3 +2818,515 @@ elif st.session_state.view_mode == "contact":
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+# ============================================================
+# FINAL DOMAIN-SAFE SELECTBOX / CLEAR-X OVERRIDE
+# ============================================================
+# Keep every disease selectbox visually identical on localhost and
+# deployed domains.  Streamlit/BaseWeb/react-aria have changed the
+# internal markup over time, so the rules below intentionally cover
+# both the older BaseWeb selectbox and newer selectbox markup.
+st.markdown(r"""
+<style>
+/* ------------------------------------------------------------
+   SELECTBOX FRAME
+   ------------------------------------------------------------ */
+[data-testid="stSelectbox"] [data-baseweb="select"],
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stSelectbox"] [role="combobox"] {
+    min-height: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+
+/* All selectbox text remains dark on the white field. */
+[data-testid="stSelectbox"] [data-baseweb="select"] span,
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stSelectbox"] [role="combobox"],
+[data-testid="stSelectbox"] [role="combobox"] * {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+}
+
+/* ------------------------------------------------------------
+   RIGHT-SIDE CONTROL AREA
+   ------------------------------------------------------------ */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
+[data-testid="stSelectbox"] [role="combobox"] > div:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+}
+
+/* Normal dropdown arrow: always a clean dark-blue/black arrow. */
+[data-testid="stSelectbox"] [data-baseweb="select"] svg,
+[data-testid="stSelectbox"] [role="combobox"] svg {
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ------------------------------------------------------------
+   CLEAR X
+   BaseWeb uses a clear icon when a value is selected. Some
+   Streamlit versions render it as a button, others as a wrapper.
+   Hide the broken SVG and draw a consistent, centered X instead.
+   ------------------------------------------------------------ */
+[data-testid="stSelectbox"] [aria-label*="clear" i],
+[data-testid="stSelectbox"] [title*="clear" i],
+[data-testid="stSelectbox"] button[aria-label*="clear" i],
+[data-testid="stSelectbox"] button[title*="clear" i] {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+[data-testid="stSelectbox"] [aria-label*="clear" i] svg,
+[data-testid="stSelectbox"] [title*="clear" i] svg,
+[data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
+[data-testid="stSelectbox"] button[title*="clear" i] svg {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+[data-testid="stSelectbox"] [aria-label*="clear" i]::before,
+[data-testid="stSelectbox"] [title*="clear" i]::before,
+[data-testid="stSelectbox"] button[aria-label*="clear" i]::before,
+[data-testid="stSelectbox"] button[title*="clear" i]::before {
+    content: "×" !important;
+    display: block !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    line-height: 28px !important;
+    text-align: center !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+[data-testid="stSelectbox"] [aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] [title*="clear" i]:hover,
+[data-testid="stSelectbox"] button[aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] button[title*="clear" i]:hover {
+    background: #E2E8F0 !important;
+}
+
+/* Prevent the clear icon and arrow from being accidentally turned
+   into filled circles by broad SVG rules elsewhere in the app. */
+[data-testid="stSelectbox"] [aria-label*="clear" i] * ,
+[data-testid="stSelectbox"] [title*="clear" i] * {
+    box-sizing: border-box !important;
+}
+
+/* ------------------------------------------------------------
+   OPEN DROPDOWN — SAME GEOMETRY FOR EVERY DISEASE
+   ------------------------------------------------------------ */
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+[data-testid="stSelectboxVirtualDropdown"],
+[data-testid="stSelectboxVirtualDropdown"] > div,
+[role="listbox"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18) !important;
+    overflow: hidden !important;
+    z-index: 999999 !important;
+}
+
+[data-baseweb="menu"] [role="option"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"],
+[role="listbox"] [role="option"] {
+    min-height: 40px !important;
+    box-sizing: border-box !important;
+    padding: 9px 12px !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    border: 0 !important;
+}
+
+[data-baseweb="menu"] [role="option"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
+[role="listbox"] [role="option"] * {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+[data-baseweb="menu"] [role="option"]:hover,
+[data-baseweb="menu"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[role="listbox"] [role="option"]:hover,
+[role="listbox"] [role="option"][aria-selected="true"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+[data-baseweb="menu"] [role="option"]:hover *,
+[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
+[role="listbox"] [role="option"]:hover *,
+[role="listbox"] [role="option"][aria-selected="true"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* ------------------------------------------------------------
+   DARK MODE: THE SELECTBOX ITSELF STAYS WHITE, exactly like the
+   original design requested. The X and arrow stay dark for contrast.
+   ------------------------------------------------------------ */
+[data-theme="dark"] [data-testid="stSelectbox"] [data-baseweb="select"],
+.dark [data-testid="stSelectbox"] [data-baseweb="select"],
+body.dark [data-testid="stSelectbox"] [data-baseweb="select"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+/* ------------------------------------------------------------
+   FIX BASEWEB/STREAMLIT DROPDOWN INTERNAL SEARCH INPUT
+   Some Streamlit/BaseWeb versions render an internal input inside
+   the opened menu. Broad input CSS can make it appear as a strange
+   blue/white bar at the bottom of the dropdown. Selectboxes here
+   use normal option picking, so hide that internal menu input only.
+   This applies to every disease selectbox.
+   ------------------------------------------------------------ */
+[data-baseweb="popover"] input,
+[data-baseweb="popover"] [data-baseweb="input"],
+[data-baseweb="menu"] input,
+[data-baseweb="menu"] [data-baseweb="input"],
+[data-testid="stSelectboxVirtualDropdown"] input,
+[data-testid="stSelectboxVirtualDropdown"] [data-baseweb="input"],
+[role="listbox"] input,
+[role="listbox"] [data-baseweb="input"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Remove any focus ring that a hidden menu input may leave behind. */
+[data-baseweb="popover"] [data-baseweb="input"] > div,
+[data-baseweb="menu"] [data-baseweb="input"] > div,
+[data-testid="stSelectboxVirtualDropdown"] [data-baseweb="input"] > div,
+[role="listbox"] [data-baseweb="input"] > div {
+    display: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Keep the dropdown itself clean and fully visible. */
+[data-baseweb="popover"] [data-baseweb="menu"],
+[data-testid="stSelectboxVirtualDropdown"],
+[data-testid="stSelectboxVirtualDropdown"] > div,
+[role="listbox"] {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* A selected value gets one clean, centered X. */
+[data-testid="stSelectbox"] button[aria-label*="clear" i],
+[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i],
+[data-testid="stSelectbox"] [title*="clear" i] {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-testid="stSelectbox"] button[aria-label*="clear" i]::before,
+[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i]::before,
+[data-testid="stSelectbox"] [title*="clear" i]::before {
+    content: "×" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 21px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+[data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
+[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i] svg,
+[data-testid="stSelectbox"] [title*="clear" i] svg {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+[data-testid="stSelectbox"] button[aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] [title*="clear" i]:hover {
+    background: #E2E8F0 !important;
+    border-radius: 50% !important;
+}
+
+/* ------------------------------------------------------------
+   DOMAIN / RESPONSIVE SAFETY
+   Prevent the select controls from being clipped or shifting on
+   hosted domains with different viewport widths or browser zoom.
+   ------------------------------------------------------------ */
+[data-testid="stSelectbox"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+[data-testid="stSelectbox"] > div,
+[data-testid="stSelectbox"] [data-baseweb="select"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
+# FINAL DROPDOWN SEARCH INPUT CLEANUP
+# ============================================================
+
+
+# ============================================================
+# FINAL DROPDOWN SEARCH INPUT CLEANUP
+# ============================================================
+st.markdown(r"""
+<style>
+/* Hide the internal BaseWeb search input that otherwise appears as
+   the unwanted blue/white bar when a selectbox is opened. */
+[data-baseweb="popover"] input[role="combobox"],
+[data-baseweb="menu"] input[role="combobox"],
+[data-testid="stSelectboxVirtualDropdown"] input[role="combobox"],
+[role="listbox"] input[role="combobox"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    opacity: 0 !important;
+}
+
+/* Catch BaseWeb versions where the input is wrapped without the
+   data-baseweb="input" attribute. */
+[data-baseweb="popover"] div:has(> input[role="combobox"]),
+[data-baseweb="menu"] div:has(> input[role="combobox"]),
+[data-testid="stSelectboxVirtualDropdown"] div:has(> input[role="combobox"]),
+[role="listbox"] div:has(> input[role="combobox"]) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Catch the standard BaseWeb input wrapper. */
+[data-baseweb="popover"] div[data-baseweb="input"],
+[data-baseweb="menu"] div[data-baseweb="input"],
+[data-testid="stSelectboxVirtualDropdown"] div[data-baseweb="input"],
+[role="listbox"] div[data-baseweb="input"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Keep the actual menu and option rows clean. */
+[data-baseweb="popover"] [role="listbox"],
+[data-baseweb="menu"],
+[data-testid="stSelectboxVirtualDropdown"],
+[role="listbox"] {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    overflow-x: hidden !important;
+}
+
+[data-baseweb="popover"] [role="option"],
+[data-baseweb="menu"] [role="option"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"],
+[role="listbox"] [role="option"] {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 40px !important;
+    height: auto !important;
+    padding: 9px 12px !important;
+    box-sizing: border-box !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+[data-baseweb="popover"] [role="option"]:hover,
+[data-baseweb="menu"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[role="listbox"] [role="option"]:hover,
+[data-baseweb="popover"] [role="option"][aria-selected="true"],
+[data-baseweb="menu"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[role="listbox"] [role="option"][aria-selected="true"] {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+}
+
+[data-baseweb="popover"] [role="option"]:hover *,
+[data-baseweb="menu"] [role="option"]:hover *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
+[role="listbox"] [role="option"]:hover *,
+[data-baseweb="popover"] [role="option"][aria-selected="true"] *,
+[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
+[role="listbox"] [role="option"][aria-selected="true"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
+# FINAL SELECTBOX HOVER FIX
+# ============================================================
+# BaseWeb renders an inner div inside each option. Earlier global
+# selectbox rules were forcing that inner div to stay white, so when
+# the mouse hovered an option the parent became blue while a white
+# rectangle remained inside it. Keep the inner option layers in sync
+# with the hovered/selected option instead.
+st.markdown(r"""
+<style>
+/* The option's immediate inner wrapper must not keep a white background
+   when the option itself is blue. */
+[data-baseweb="menu"] [role="option"] > div:hover,
+[data-baseweb="menu"] [role="option"]:hover > div,
+[data-baseweb="menu"] [role="option"][aria-selected="true"] > div,
+[data-baseweb="popover"] [role="option"]:hover > div,
+[data-baseweb="popover"] [role="option"][aria-selected="true"] > div,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover > div,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] > div,
+[role="listbox"] [role="option"]:hover > div,
+[role="listbox"] [role="option"][aria-selected="true"] > div {
+    background: inherit !important;
+    background-color: inherit !important;
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
+}
+
+/* Do not let any nested option wrapper create a second white box. */
+[data-baseweb="menu"] [role="option"]:hover > div > div,
+[data-baseweb="menu"] [role="option"][aria-selected="true"] > div > div,
+[data-baseweb="popover"] [role="option"]:hover > div > div,
+[data-baseweb="popover"] [role="option"][aria-selected="true"] > div > div,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover > div > div,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] > div > div,
+[role="listbox"] [role="option"]:hover > div > div,
+[role="listbox"] [role="option"][aria-selected="true"] > div > div {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* The actual option row remains the single blue hover surface. */
+[data-baseweb="menu"] [role="option"]:hover,
+[data-baseweb="popover"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[role="listbox"] [role="option"]:hover,
+[data-baseweb="menu"] [role="option"][aria-selected="true"],
+[data-baseweb="popover"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[role="listbox"] [role="option"][aria-selected="true"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
+# CLEAR-BUTTON TOOLTIP — CONSISTENT IN LIGHT + DARK MODES
+# Keep the tooltip box neutral grey, but make its text white.
+# ============================================================
+st.markdown("""
+<style>
+[data-testid="stTooltipContent"],
+[data-testid="stTooltipContent"] > div,
+[data-baseweb="tooltip"],
+[data-baseweb="tooltip"] > div {
+    background: #374151 !important;
+    background-color: #374151 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+}
+
+[data-testid="stTooltipContent"] *,
+[data-baseweb="tooltip"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
