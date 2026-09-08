@@ -2854,6 +2854,16 @@ st.markdown(r"""
     opacity: 1 !important;
 }
 
+/* Hide the internal text caret that appears as a vertical line
+   inside an empty selectbox such as Gender. */
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stSelectbox"] [data-baseweb="select"] input[role="combobox"],
+[data-testid="stSelectbox"] [role="combobox"] input {
+    caret-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 /* ------------------------------------------------------------
    RIGHT-SIDE CONTROL AREA
    ------------------------------------------------------------ */
@@ -3327,6 +3337,93 @@ st.markdown("""
 [data-baseweb="tooltip"] * {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+
+# ============================================================
+# ONLY CHANGE REQUESTED: REMOVE THE THREE-DOT MENU
+# Keep Deploy and the sidebar hamburger unchanged.
+# ============================================================
+st.markdown("""
+<style>
+/* Streamlit main three-dot menu */
+[data-testid="stMainMenu"],
+button[aria-label="Main menu"],
+button[aria-label="Main Menu"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
+# FINAL FIX: REMOVE THE VERTICAL CARET/LINE INSIDE SELECTBOXES
+# This is intentionally the ONLY change in this version.
+# ============================================================
+st.markdown(r"""
+<style>
+/* Streamlit/BaseWeb keeps a tiny internal input inside selectboxes.
+   Hide its visual caret/border without disabling the selectbox. */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input[role="combobox"] {
+    caret-color: transparent !important;
+    -webkit-caret-color: transparent !important;
+    border: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Prevent the internal input from drawing a focus ring/line. */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input:focus,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] input:focus-visible {
+    caret-color: transparent !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
+# ONLY CHANGE REQUESTED: REMOVE THE SMALL VERTICAL LINE BEFORE
+# THE SELECTBOX PLACEHOLDER TEXT.
+# ============================================================
+st.markdown(r"""
+<style>
+/* Hide only the invisible BaseWeb input that is responsible for
+   the stray caret/vertical line. The visible selectbox text and
+   dropdown arrow remain untouched. */
+[data-testid="stSelectbox"] [data-baseweb="select"] input {
+    opacity: 0 !important;
+    caret-color: transparent !important;
+    color: transparent !important;
+    text-shadow: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Some Streamlit/BaseWeb versions put the combobox on a slightly
+   different element. Keep the same visual cleanup there. */
+[data-testid="stSelectbox"] input[role="combobox"] {
+    opacity: 0 !important;
+    caret-color: transparent !important;
+    color: transparent !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
