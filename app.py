@@ -391,34 +391,6 @@ div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] > div {
 }
 
 
-/* Functional clear (×) controls for all number inputs.
-   These are form-submit buttons because st.button() is forbidden inside st.form(). */
-.clear-number-spacer { height: 27px; }
-div[data-testid="stFormSubmitButton"] button[kind="secondary"] {
-    width: 100% !important;
-    min-width: 34px !important;
-    height: 38px !important;
-    margin-top: 0 !important;
-    padding: 0 !important;
-    border-radius: 8px !important;
-    background: #2563EB !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    line-height: 38px !important;
-}
-div[data-testid="stFormSubmitButton"] button[kind="secondary"] p {
-    color: #FFFFFF !important;
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-}
-div[data-testid="stFormSubmitButton"] button[kind="secondary"]:hover {
-    background: #1D4ED8 !important;
-}
-
 /* Blue +/- buttons */
 div[data-testid="stNumberInput"] button,
 div[data-testid="stNumberInputContainer"] button,
@@ -451,6 +423,17 @@ button[aria-label="Decrease value"]:hover,
 button[aria-label="Increase value"]:hover {
     background: #1D4ED8 !important;
     background-color: #1D4ED8 !important;
+}
+
+/* Hide Streamlit's native "Clear value" control on number inputs.
+   Keep the normal - / + controls visible. */
+div[data-testid="stNumberInput"] button[aria-label="Clear value"],
+div[data-testid="stNumberInputContainer"] button[aria-label="Clear value"],
+div[data-testid="stNumberInput"] [aria-label="Clear value"],
+div[data-testid="stNumberInputContainer"] [aria-label="Clear value"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 /* ============================================================
@@ -1138,41 +1121,19 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
 # ============================================================
 
 
-def _clear_number_input(key):
-    """Clear a number-input widget from a form-submit callback."""
-    st.session_state[key] = None
-
 def clearable_number_input(label, *, key, min_value=None, max_value=None, value=None, placeholder=None, step=None):
-    """Number input with a functional × clear control that is form-safe.
+    """Compatibility wrapper: use only Streamlit's native number input controls."""
+    kwargs = {
+        "min_value": min_value,
+        "max_value": max_value,
+        "value": value,
+        "placeholder": placeholder,
+        "key": key,
+    }
+    if step is not None:
+        kwargs["step"] = step
+    return st.number_input(label, **kwargs)
 
-    Streamlit does not allow st.button() inside st.form(). Therefore the clear
-    control is implemented as a form_submit_button with a callback. The callback
-    clears only this widget's session-state value; it does not trigger analysis.
-    """
-    left, right = st.columns([0.94, 0.06], gap="small")
-    with left:
-        kwargs = {
-            "min_value": min_value,
-            "max_value": max_value,
-            "value": value,
-            "placeholder": placeholder,
-            "key": key,
-        }
-        if step is not None:
-            kwargs["step"] = step
-        result = st.number_input(label, **kwargs)
-
-    with right:
-        st.markdown("<div class='clear-number-spacer'></div>", unsafe_allow_html=True)
-        st.form_submit_button(
-            "×",
-            key=f"{key}__clear",
-            help=f"Clear {label}",
-            type="secondary",
-            on_click=_clear_number_input,
-            args=(key,),
-        )
-    return result
 
 def get_theme_mode():
     # Use the dedicated theme state as the single source of truth.
