@@ -3358,33 +3358,103 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] input:focus-visible {
 
 
 # ============================================================
-# ONLY CHANGE REQUESTED: REMOVE THE SMALL VERTICAL LINE BEFORE
-# THE SELECTBOX PLACEHOLDER TEXT.
+
+# ============================================================
+# FINAL SELECTBOX TEXT / PLACEHOLDER FIX
+# Keep the placeholder visible when no option is selected, and
+# keep the selected option visible after the user chooses one.
+# Apply consistently to every selectbox in the app.
 # ============================================================
 st.markdown(r"""
 <style>
-/* Hide only the invisible BaseWeb input that is responsible for
-   the stray caret/vertical line. The visible selectbox text and
-   dropdown arrow remain untouched. */
-[data-testid="stSelectbox"] [data-baseweb="select"] input {
-    opacity: 0 !important;
+/* Never hide the selectbox's real text input. */
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stSelectbox"] input[role="combobox"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    background: transparent !important;
     caret-color: transparent !important;
-    color: transparent !important;
-    text-shadow: none !important;
-    border: 0 !important;
-    outline: 0 !important;
+    outline: none !important;
     box-shadow: none !important;
 }
 
-/* Some Streamlit/BaseWeb versions put the combobox on a slightly
-   different element. Keep the same visual cleanup there. */
-[data-testid="stSelectbox"] input[role="combobox"] {
-    opacity: 0 !important;
-    caret-color: transparent !important;
-    color: transparent !important;
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
+/* Make the placeholder readable in every selectbox. */
+[data-testid="stSelectbox"] [data-baseweb="select"] input::placeholder,
+[data-testid="stSelectbox"] input[role="combobox"]::placeholder {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+}
+
+/* Streamlit/BaseWeb may render the placeholder or selected value as
+   a separate text node instead of the input's placeholder. Keep both
+   states visible. */
+[data-testid="stSelectbox"] [data-baseweb="select"] span,
+[data-testid="stSelectbox"] [data-baseweb="select"] [aria-selected="true"],
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* The empty-field placeholder is also allowed to remain visible. */
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-placeholder="true"],
+[data-testid="stSelectbox"] [data-baseweb="select"] [class*="placeholder"] {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Do not let the clear control cover the selected value. */
+[data-testid="stSelectbox"] [aria-label*="clear" i],
+[data-testid="stSelectbox"] [title*="clear" i] {
+    flex: 0 0 28px !important;
+}
+
+/* Every dropdown option remains visible and readable. */
+[data-baseweb="menu"] [role="option"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"],
+[role="listbox"] [role="option"] {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+[data-baseweb="menu"] [role="option"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
+[role="listbox"] [role="option"] * {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Selected/hovered option: blue background + white text. */
+[data-baseweb="menu"] [role="option"]:hover,
+[data-baseweb="menu"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[role="listbox"] [role="option"]:hover,
+[role="listbox"] [role="option"][aria-selected="true"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+[data-baseweb="menu"] [role="option"]:hover *,
+[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
+[role="listbox"] [role="option"]:hover *,
+[role="listbox"] [role="option"][aria-selected="true"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
 }
 </style>
 """, unsafe_allow_html=True)
