@@ -1051,14 +1051,15 @@ def create_xai_chart(names, values):
 # ============================================================
 # MODEL-DERIVED XAI
 # ============================================================
-def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_features=None):
-    """Return model-feature importance for the requested clinical fields.
+def model_derived_xai(model, scaled_values, feature_cols, top_n=4,
+                       preferred_features=None, submitted_inputs=None):
+    """Build a patient-specific XAI chart from the fields actually entered.
 
-    For the heart model we intentionally restrict the chart to the clinical
-    parameters (cp, restecg, exang, oldpeak, slope, ca, thal).  The values are
-    derived from the loaded model's feature_importances_, so the chart does
-    not accidentally promote Age/Height/Weight/Glucose just because they are
-    visible in the UI.
+    The model's feature importance provides the baseline influence of each
+    feature. Only fields supplied by this patient are included, and the
+    displayed percentages are re-normalized across those supplied fields.
+    Thus, if only a few fields are entered, the chart represents only those
+    fields instead of the model's usual full-feature ranking.
     """
     names = list(feature_cols)
     if not names:
@@ -1076,7 +1077,9 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
     if len(importance) != len(names):
         return [], []
 
+    # Start with all model features, then apply the disease-specific filter.
     candidate_indices = np.arange(len(names))
+
     if preferred_features:
         preferred_normalized = {
             str(v).strip().lower().replace(" ", "_")
@@ -1087,16 +1090,97 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
             if str(name).strip().lower().replace(" ", "_") in preferred_normalized
         ], dtype=int)
 
+    # Keep ONLY features that the patient actually supplied.
+    if submitted_inputs is not None:
+        submitted_indices = []
+        for i, name in enumerate(names):
+            value = submitted_inputs.get(name)
+
+            # Handle common model/UI naming differences.
+            if value is None:
+                aliases = {
+                    "age": ["Age", "AGE"],
+                    "bmi": ["BMI"],
+                    "hba1c": ["HbA1c"],
+                    "chol": ["Chol"],
+                    "tg": ["TG"],
+                    "hdl": ["HDL"],
+                    "ldl": ["LDL"],
+                    "urea": ["Urea"],
+                    "cr": ["Cr"],
+                }
+                aliases_for_name = aliases.get(str(name).strip().lower(), [])
+                for alias in aliases_for_name:
+                    if submitted_inputs.get(alias) is not None:
+                        value = submitted_inputs[alias]
+                        break
+
+            if value is not None:
+                submitted_indices.append(i)
+
+        submitted_set = set(submitted_indices)
+        candidate_indices = np.array(
+            [i for i in candidate_indices if i in submitted_set],
+            dtype=int
+        )
+
     if len(candidate_indices) == 0:
         return [], []
 
-    candidate_scores = np.nan_to_num(importance[candidate_indices], nan=0.0)
-    if np.max(candidate_scores) > 0:
-        display_scores = candidate_scores / np.max(candidate_scores) * 100.0
+    # Patient-specific weighting:
+    # model importance × relative magnitude of the supplied feature.
+    # This makes the chart respond to the actual values entered while
+    # retaining the model's learned feature influence.
+    scores = np.nan_to_num(importance[candidate_indices], nan=0.0)
+
+    if submitted_inputs is not None:
+        value_factors = []
+        for idx in candidate_indices:
+            name = names[idx]
+            value = submitted_inputs.get(name)
+
+            if value is None:
+                aliases = {
+                    "age": ["Age", "AGE"],
+                    "bmi": ["BMI"],
+                    "hba1c": ["HbA1c"],
+                    "chol": ["Chol"],
+                    "tg": ["TG"],
+                    "hdl": ["HDL"],
+                    "ldl": ["LDL"],
+                    "urea": ["Urea"],
+                    "cr": ["Cr"],
+                }
+                for alias in aliases.get(str(name).strip().lower(), []):
+                    if submitted_inputs.get(alias) is not None:
+                        value = submitted_inputs[alias]
+                        break
+
+            try:
+                numeric_value = abs(float(value))
+            except (TypeError, ValueError):
+                numeric_value = 1.0
+
+            # Use a stable logarithmic magnitude so large clinical units
+            # (e.g. cholesterol) do not overwhelm smaller ones (e.g. age).
+            value_factors.append(np.log1p(numeric_value))
+
+        value_factors = np.asarray(value_factors, dtype=float)
+        if np.any(value_factors > 0):
+            scores = scores * value_factors
+
+    # Re-normalize ONLY across the fields entered by this patient.
+    # Therefore the visible percentages are specific to this submission.
+    total = float(np.sum(scores))
+    if total > 0:
+        display_scores = scores / total * 100.0
+    elif len(scores):
+        display_scores = np.ones(len(scores), dtype=float) / len(scores) * 100.0
     else:
-        display_scores = np.zeros_like(candidate_scores)
+        return [], []
 
     order = np.argsort(display_scores)[::-1][:top_n]
+
     pretty_map = {
         "cp": "Chest Pain Type",
         "restecg": "Resting ECG",
@@ -1105,13 +1189,27 @@ def model_derived_xai(model, scaled_values, feature_cols, top_n=4, preferred_fea
         "slope": "ST Segment Slope",
         "ca": "Major Vessels (CA)",
         "thal": "Thalassemia",
+        "AGE": "Age",
+        "BMI": "BMI",
+        "HbA1c": "HbA1c",
+        "Chol": "Cholesterol",
+        "TG": "Triglycerides",
+        "HDL": "HDL",
+        "LDL": "LDL",
+        "Urea": "Urea",
+        "Cr": "Creatinine",
     }
 
     pretty_names, pretty_scores = [], []
     for pos in order:
         idx = int(candidate_indices[pos])
         raw_name = str(names[idx]).strip().lower().replace(" ", "_")
-        pretty_names.append(pretty_map.get(raw_name, str(names[idx]).replace("_", " ").title()))
+        pretty_names.append(
+            pretty_map.get(
+                names[idx],
+                pretty_map.get(raw_name, str(names[idx]).replace("_", " ").title())
+            )
+        )
         pretty_scores.append(float(display_scores[pos]))
 
     return pretty_names[::-1], pretty_scores[::-1]
@@ -2342,10 +2440,29 @@ elif st.session_state.view_mode == "input":
         submit = st.form_submit_button("🔍 Analyze Health Risk", use_container_width=True)
 
         if submit:
-            missing_fields = [key for key, value in inputs.items() if value is None]
+            # Only the important clinical fields need at least one value.
+            # Optional fields may remain blank and the model will use
+            # training-data defaults for those missing values.
+            # Require a meaningful minimum set of patient information.
+            # Missing optional fields are allowed, but a single field such as
+            # Gender alone is not enough to generate a prediction.
+            minimum_required_fields = {
+                "heart": {"Age", "Sex", "trestbps", "thalach", "chol", "cp"},
+                "diabetes": {"AGE", "BMI", "HbA1c", "Gender_M", "Gender_f"},
+                "kidney": {"Age", "Creatinine_Level", "BUN", "GFR", "Urine_Output"},
+            }
 
-            if missing_fields:
-                st.warning("Please fill in all patient information fields before analyzing your health risk.")
+            required_keys = minimum_required_fields.get(current_dis, set())
+            filled_required_count = sum(
+                inputs.get(key) is not None for key in required_keys
+            )
+
+            # At least 3 important fields must be supplied.
+            # The remaining fields can be left blank.
+            if filled_required_count < 3:
+                st.warning(
+                    "Please fill in the important patient information above before analyzing your health risk."
+                )
             else:
                 st.session_state.user_inputs = inputs
                 st.session_state.view_mode = "result"
@@ -2360,14 +2477,9 @@ elif st.session_state.view_mode == "result":
     current_dis = st.session_state.selected_disease
     inputs = st.session_state.user_inputs
 
-    # Defensive guard for a partially populated session state.
-    if any(value is None for value in inputs.values()):
-        st.warning("Please complete all patient information before viewing the prediction result.")
-        if st.button("← Back to Health Information", key="back_incomplete_result"):
-            st.session_state.view_mode = "input"
-            st.rerun()
-        st.stop()
-
+    # Partial information is allowed once at least one important field
+    # has been supplied. Missing model features are replaced with the
+    # corresponding training-data mean when available.
     model, scaler, feature_cols = load_disease_assets(current_dis)
 
     # Use the exact feature order saved with the trained model/scaler.
@@ -2382,11 +2494,16 @@ elif st.session_state.view_mode == "result":
     raw_df = pd.DataFrame([inputs])
 
     # Ignore UI-only fields when they are not part of the trained model.
-    # Fill genuinely missing model columns with 0 only when the saved
-    # feature list says they are expected.
+    # For fields that the user left blank, use the training-data mean from
+    # StandardScaler when available. This keeps partial-input prediction
+    # model-compatible without changing any supplied patient values.
+    scaler_means = {}
+    if scaler is not None and hasattr(scaler, "mean_"):
+        scaler_means = dict(zip(feature_cols, np.asarray(scaler.mean_, dtype=float)))
+
     for col in feature_cols:
-        if col not in raw_df.columns:
-            raw_df[col] = 0.0
+        if col not in raw_df.columns or pd.isna(raw_df.at[0, col]):
+            raw_df[col] = float(scaler_means.get(col, 0.0))
 
     raw_df = raw_df.loc[:, feature_cols]
 
@@ -2435,6 +2552,14 @@ elif st.session_state.view_mode == "result":
         confidence = 91.0
 
     prob = risk_prob
+
+    # Let the user know that the result was generated from partial information.
+    # This does not block the prediction.
+    if any(value is None for value in inputs.values()):
+        st.info(
+            "Prediction generated using the information provided. "
+            "Any blank model fields were estimated using training-data defaults."
+        )
 
     disease_name = {
         "heart": "Heart Disease",
@@ -2496,7 +2621,7 @@ elif st.session_state.view_mode == "result":
         st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
         st.markdown("<div class='section-title'>🧠 Explainable AI</div>", unsafe_allow_html=True)
         st.markdown(
-            "<div class='small-muted'>Main clinical factors derived from the loaded model and this patient's submitted values.</div>",
+            "<div class='small-muted'>Main clinical factors based only on the information entered for this patient.</div>",
             unsafe_allow_html=True
         )
 
@@ -2515,14 +2640,16 @@ elif st.session_state.view_mode == "result":
                 scaled_vals,
                 feature_cols,
                 top_n=4,
-                preferred_features=heart_main_factors
+                preferred_features=heart_main_factors,
+                submitted_inputs=inputs
             )
         else:
             x_names, x_values = model_derived_xai(
                 model,
                 scaled_vals,
                 feature_cols,
-                top_n=4
+                top_n=4,
+                submitted_inputs=inputs
             )
 
         if x_names:
@@ -3455,6 +3582,46 @@ st.markdown(r"""
 [role="listbox"] [role="option"][aria-selected="true"] * {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
+# FINAL UI FIX: MAKE DROPDOWN BOXES MATCH NORMAL INPUT BOXES
+# Only changes the closed selectbox appearance. No prediction,
+# validation, XAI, or dropdown-option behaviour is changed.
+# ============================================================
+st.markdown(r"""
+<style>
+/* Match every closed dropdown to the normal white input box. */
+[data-testid="stSelectbox"] div[data-baseweb="select"],
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-color: #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+}
+
+/* Keep the dropdown text readable just like normal inputs. */
+[data-testid="stSelectbox"] div[data-baseweb="select"] span,
+[data-testid="stSelectbox"] div[data-baseweb="select"] input,
+[data-testid="stSelectbox"] div[data-baseweb="select"] [data-baseweb="value-container"] {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+    background: transparent !important;
+}
+
+/* Keep the arrow and clear X dark on the white box. */
+[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
 }
 </style>
 """, unsafe_allow_html=True)
