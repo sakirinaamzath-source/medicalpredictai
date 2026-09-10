@@ -616,8 +616,8 @@ button[data-testid="stBaseButton-headerNoPadding"]::before {
     width: 22px !important;
     height: 3px !important;
     border-radius: 3px !important;
-    background: #000000 !important;
-    box-shadow: 0 7px 0 #000000, 0 14px 0 #000000 !important;
+    background: #0F2A5F !important;
+    box-shadow: 0 7px 0 #0F2A5F, 0 14px 0 #0F2A5F !important;
     display: block !important;
 }
 
@@ -3677,84 +3677,3 @@ if get_theme_mode() == "Dark":
     """, unsafe_allow_html=True)
 
 
-# ============================================================
-# FINAL DOMAIN DROPDOWN FIX — FORCE CLOSED SELECTBOX WHITE
-# Only fixes the closed selectbox appearance. Everything else is unchanged.
-# ============================================================
-st.markdown(r"""
-<style>
-/* Force the complete CLOSED BaseWeb selectbox shell to match normal inputs. */
-[data-testid="stSelectbox"] [data-baseweb="select"],
-[data-testid="stSelectbox"] [data-baseweb="select"] > div,
-[data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
-[data-testid="stSelectbox"] [data-baseweb="value-container"],
-[data-testid="stSelectbox"] [role="combobox"] {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border-color: #CBD5E1 !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    box-shadow: none !important;
-}
-
-/* Catch BaseWeb's nested layers that can become dark on the deployed domain. */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div > div > div,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] > div {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-/* Selected value / placeholder text inside the CLOSED field. */
-[data-testid="stSelectbox"] [data-baseweb="select"] span,
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] *,
-[data-testid="stSelectbox"] [data-baseweb="select"] [role="combobox"] * {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-}
-
-/* Keep the arrow black on the white field. */
-[data-testid="stSelectbox"] [data-baseweb="select"] svg,
-[data-testid="stSelectbox"] [data-baseweb="select"] path {
-    color: #0F172A !important;
-    fill: #0F172A !important;
-    stroke: #0F172A !important;
-    opacity: 1 !important;
-}
-
-/* Never let the browser/app dark theme recolor the CLOSED field. */
-@media (prefers-color-scheme: dark) {
-    [data-testid="stSelectbox"] [data-baseweb="select"],
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div > div,
-    [data-testid="stSelectbox"] [data-baseweb="value-container"],
-    [data-testid="stSelectbox"] [data-baseweb="value-container"] > div,
-    [data-testid="stSelectbox"] [role="combobox"] {
-        background: #FFFFFF !important;
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-        border-color: #CBD5E1 !important;
-    }
-
-    [data-testid="stSelectbox"] [data-baseweb="select"] span,
-    [data-testid="stSelectbox"] [data-baseweb="select"] input,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] * {
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-    }
-
-    [data-testid="stSelectbox"] [data-baseweb="select"] svg,
-    [data-testid="stSelectbox"] [data-baseweb="select"] path {
-        color: #0F172A !important;
-        fill: #0F172A !important;
-        stroke: #0F172A !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
