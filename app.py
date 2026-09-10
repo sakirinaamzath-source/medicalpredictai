@@ -3676,3 +3676,99 @@ if get_theme_mode() == "Dark":
     </style>
     """, unsafe_allow_html=True)
 
+
+# ============================================================
+# FINAL SELECTBOX OVERRIDE — FORCE WHITE CLOSED DROPDOWN BOXES
+# Matches the normal white input boxes in BOTH Light and Dark mode.
+# ============================================================
+st.markdown(r"""
+<style>
+[data-testid="stSelectbox"] [data-baseweb="select"],
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stSelectbox"] [role="combobox"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-color: #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0F172A !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+}
+
+/* Force every internal layer of the CLOSED dropdown to remain white. */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
+[data-testid="stSelectbox"] [data-baseweb="value-container"],
+[data-testid="stSelectbox"] [data-baseweb="select"] [role="combobox"] {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+
+/* Selected value and placeholder text */
+[data-testid="stSelectbox"] [data-baseweb="select"] span,
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stSelectbox"] [data-baseweb="value-container"],
+[data-testid="stSelectbox"] [data-baseweb="select"] [role="combobox"] {
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    opacity: 1 !important;
+}
+
+/* Placeholder */
+[data-testid="stSelectbox"] [data-baseweb="select"] input::placeholder,
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-placeholder="true"],
+[data-testid="stSelectbox"] [data-baseweb="select"] [class*="placeholder"] {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+}
+
+/* Dropdown arrow */
+[data-testid="stSelectbox"] [data-baseweb="select"] svg,
+[data-testid="stSelectbox"] [data-baseweb="select"] path {
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
+    opacity: 1 !important;
+}
+
+/* Remove internal caret/typing line without hiding the selectbox text. */
+[data-testid="stSelectbox"] [data-baseweb="select"] input {
+    caret-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Dark browser/app theme must not turn the CLOSED field black. */
+@media (prefers-color-scheme: dark) {
+    [data-testid="stSelectbox"] [data-baseweb="select"],
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div,
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
+    [data-testid="stSelectbox"] [data-baseweb="value-container"],
+    [data-testid="stSelectbox"] [role="combobox"] {
+        background: #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        border-color: #CBD5E1 !important;
+    }
+
+    [data-testid="stSelectbox"] [data-baseweb="select"] span,
+    [data-testid="stSelectbox"] [data-baseweb="select"] input,
+    [data-testid="stSelectbox"] [data-baseweb="value-container"],
+    [data-testid="stSelectbox"] [role="combobox"] {
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+    }
+
+    [data-testid="stSelectbox"] [data-baseweb="select"] svg,
+    [data-testid="stSelectbox"] [data-baseweb="select"] path {
+        color: #0F172A !important;
+        fill: #0F172A !important;
+        stroke: #0F172A !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
