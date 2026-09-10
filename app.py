@@ -637,17 +637,28 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
         font-weight: 700 !important;
     }
 
-    .patient-snapshot .snapshot-label,
-    .patient-snapshot .snapshot-value {
-        color: #F8FAFC !important;
-        font-weight: 750 !important;
+    /* Keep the normal/light theme unchanged. */
+    .patient-snapshot .snapshot-label {
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+        font-weight: 700 !important;
         letter-spacing: 0.01em !important;
     }
 
+    .patient-snapshot .snapshot-value {
+        color: #0F172A !important;
+        -webkit-text-fill-color: #0F172A !important;
+        font-weight: 750 !important;
+    }
+
+    /* The app's own Dark-mode switch is handled in Python below.
+       These selectors are additionally used for browser dark mode. */
     @media (prefers-color-scheme: dark) {
         .patient-snapshot .snapshot-label,
-        .patient-snapshot .snapshot-value {
+        .patient-snapshot .snapshot-value,
+        .patient-snapshot .section-title {
             color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
             font-weight: 750 !important;
         }
     }
@@ -2673,7 +2684,7 @@ elif st.session_state.view_mode == "result":
 
     # Patient snapshot
     with r3:
-        st.markdown("<div class='dashboard-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='dashboard-card patient-snapshot'>", unsafe_allow_html=True)
         st.markdown("<div class='section-title'>Patient Snapshot</div>", unsafe_allow_html=True)
 
         if current_dis == "heart":
@@ -2765,14 +2776,26 @@ elif st.session_state.view_mode == "result":
                 display_value = f"{value} µmol/L"
 
             st.markdown(
-                f"<div style='padding:8px 0;border-bottom:1px solid #E2E8F0;'>"
-                f"<span style='color:#64748B'>{pretty}</span>"
-                f"<span style='float:right;font-weight:700;color:#0F172A'>{display_value}</span>"
+                f"<div class='snapshot-row' style='padding:8px 0;border-bottom:1px solid #E2E8F0;'>"
+                f"<span class='snapshot-label'>{pretty}</span>"
+                f"<span class='snapshot-value' style='float:right'>{display_value}</span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+        if get_theme_mode() == "Dark":
+            st.markdown("""
+            <style>
+                .patient-snapshot .snapshot-label,
+                .patient-snapshot .snapshot-value,
+                .patient-snapshot .section-title {
+                    color: #FFFFFF !important;
+                    -webkit-text-fill-color: #FFFFFF !important;
+                }
+            </style>
+            """, unsafe_allow_html=True)
 
     # Recommendations
     st.markdown("<div class='section-title'>💡 Health Insights & Recommendations</div>", unsafe_allow_html=True)
@@ -3625,3 +3648,31 @@ st.markdown(r"""
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ============================================================
+# PATIENT SNAPSHOT — PURE WHITE TEXT IN DARK MODE
+# Scoped only to the Patient Snapshot card.
+# ============================================================
+if get_theme_mode() == "Dark":
+    st.markdown(r"""
+    <style>
+        .patient-snapshot,
+        .patient-snapshot * {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+
+        .patient-snapshot span,
+        .patient-snapshot span[style*="color"],
+        .patient-snapshot div[style*="color"] {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+
+        .patient-snapshot .section-title {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
