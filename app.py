@@ -514,6 +514,25 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     -webkit-text-fill-color: #0F172A !important;
 }
 
+/* ============================================================
+   PATIENT SNAPSHOT — DARK MODE OVERRIDES
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  .patient-snapshot .snapshot-label,
+  .patient-snapshot .snapshot-value {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+  }
+}
+
+[data-theme="dark"] .patient-snapshot .snapshot-label,
+[data-theme="dark"] .patient-snapshot .snapshot-value,
+.dark .patient-snapshot .snapshot-label,
+.dark .patient-snapshot .snapshot-value {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
 /* Base side layout styling */
 [data-testid="stSidebar"] {
     width: 300px !important;
@@ -589,26 +608,6 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 [data-testid="stSidebar"] [data-testid="stCheckbox"] {
     padding: 0 !important;
     margin: 0 !important;
-}
-
-/* ============================================================
-   PATIENT SNAPSHOT — DARK MODE OVERRIDE
-   ============================================================ */
-@media (prefers-color-scheme: dark) {
-  .patient-snapshot .snapshot-label,
-  .patient-snapshot .snapshot-value {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-  }
-}
-
-/* If your app uses Streamlit's dark theme attribute selector: */
-[data-theme="dark"] .patient-snapshot .snapshot-label,
-[data-theme="dark"] .patient-snapshot .snapshot-value,
-.dark .patient-snapshot .snapshot-label,
-.dark .patient-snapshot .snapshot-value {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
 }
 </style>
 """, unsafe_allow_html=True)
