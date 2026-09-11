@@ -590,6 +590,26 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     padding: 0 !important;
     margin: 0 !important;
 }
+
+/* ============================================================
+   PATIENT SNAPSHOT — DARK MODE OVERRIDE
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  .patient-snapshot .snapshot-label,
+  .patient-snapshot .snapshot-value {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+  }
+}
+
+/* If your app uses Streamlit's dark theme attribute selector: */
+[data-theme="dark"] .patient-snapshot .snapshot-label,
+[data-theme="dark"] .patient-snapshot .snapshot-value,
+.dark .patient-snapshot .snapshot-label,
+.dark .patient-snapshot .snapshot-value {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
