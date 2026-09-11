@@ -2148,7 +2148,7 @@ elif st.session_state.view_mode == "contact":
     """, unsafe_allow_html=True)
 
 # ============================================================
-# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES
+# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES & BLUE BUTTON
 # ============================================================
 st.markdown(r"""
 <style>
@@ -2169,10 +2169,11 @@ st.markdown(r"""
     box-shadow: none !important;
     outline: none !important;
     color: #0F172A !important;
+    overflow: hidden !important;
 }
 
 /* Force ALL internal dropdown layers to stay white
-   and prevent the black/dark corners */
+   and prevent black/dark corners */
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
 [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
 [data-testid="stSelectbox"] [role="combobox"] > div {
@@ -2200,25 +2201,32 @@ st.markdown(r"""
 }
 
 /* ============================================================
-   DROPDOWN ARROW AREA
-   Keep it WHITE — no black block
+   DROPDOWN ARROW AREA — BLUE BUTTON MATCHING +/- CONTROLS
    ============================================================ */
 
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
-[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+div[data-baseweb="select"] > div:nth-child(2),
+div[data-baseweb="select"] > div:last-child,
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
     border: none !important;
-    color: #0F172A !important;
     box-shadow: none !important;
 }
 
-/* Arrow icon */
+/* Arrow icon color set to white */
+div[data-baseweb="select"] svg,
 [data-testid="stSelectbox"] [data-baseweb="select"] svg {
-    color: #0F172A !important;
-    fill: #0F172A !important;
-    stroke: #0F172A !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
     opacity: 1 !important;
+}
+
+/* Hover state for arrow button */
+div[data-baseweb="select"] > div:nth-child(2):hover,
+div[data-baseweb="select"] > div:last-child:hover {
+    background: #1D4ED8 !important;
+    background-color: #1D4ED8 !important;
 }
 
 /* ============================================================
