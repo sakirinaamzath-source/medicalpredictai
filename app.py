@@ -28,16 +28,11 @@ if "user_inputs" not in st.session_state:
 if "last_prediction" not in st.session_state:
     st.session_state.last_prediction = None
 
-# Theme is kept in dedicated session-state variables so navigation
-# buttons/reruns can never reset the selected theme.
-# The radio widget is initialized ONCE from the saved theme and then
-# becomes the source of truth for Light / Dark / Auto.
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = st.session_state.get("sidebar_theme", "Light")
 if "sidebar_theme_selector" not in st.session_state:
     st.session_state.sidebar_theme_selector = st.session_state.theme_mode
 
-# Keep the legacy key synchronized for compatibility with existing code.
 st.session_state.sidebar_theme = st.session_state.theme_mode
 
 # ============================================================
@@ -67,8 +62,21 @@ st.markdown("""
     font-family: 'Inter', sans-serif !important;
 }
 
-[data-testid="stHeader"] {
-    background: transparent !important;
+/* REMOVE 3 DOTS MENU AND HEADER ENTIRELY */
+[data-testid="stHeader"], 
+[data-testid="stToolbar"],
+#MainMenu,
+footer,
+header,
+[data-testid="stActionButtonIcon"],
+.stActionButton {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 [data-testid="stSidebar"] {
@@ -349,11 +357,6 @@ hr {
     margin: 18px 4px 7px;
 }
 
-/* ============================================================
-   EXACT CLEAN FORM CONTROLS
-   White input area + blue +/- controls, with no dark corners.
-   ============================================================ */
-
 /* Number-input outer shell */
 div[data-testid="stNumberInput"] > div,
 div[data-testid="stNumberInputContainer"] > div {
@@ -365,7 +368,6 @@ div[data-testid="stNumberInputContainer"] > div {
     box-shadow: none !important;
 }
 
-/* The actual white typing area */
 div[data-testid="stNumberInput"] input,
 div[data-testid="stNumberInputContainer"] input,
 div[data-testid="stNumberInput"] div[data-baseweb="input"] input,
@@ -379,7 +381,6 @@ div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] input {
     opacity: 1 !important;
 }
 
-/* White BaseWeb input section — removes black/dark corner artifacts */
 div[data-testid="stNumberInput"] div[data-baseweb="input"],
 div[data-testid="stNumberInputContainer"] div[data-baseweb="input"],
 div[data-testid="stNumberInput"] div[data-baseweb="input"] > div,
@@ -390,7 +391,6 @@ div[data-testid="stNumberInputContainer"] div[data-baseweb="input"] > div {
     box-shadow: none !important;
 }
 
-/* Blue +/- buttons */
 div[data-testid="stNumberInput"] button,
 div[data-testid="stNumberInputContainer"] button,
 button[aria-label="Decrease value"],
@@ -404,7 +404,6 @@ button[aria-label="Increase value"] {
     border-radius: 0 !important;
 }
 
-/* White +/- symbols */
 div[data-testid="stNumberInput"] button *,
 div[data-testid="stNumberInputContainer"] button *,
 button[aria-label="Decrease value"] *,
@@ -415,7 +414,6 @@ button[aria-label="Increase value"] * {
     opacity: 1 !important;
 }
 
-/* Keep the right control area blue on hover */
 div[data-testid="stNumberInput"] button:hover,
 div[data-testid="stNumberInputContainer"] button:hover,
 button[aria-label="Decrease value"]:hover,
@@ -424,7 +422,6 @@ button[aria-label="Increase value"]:hover {
     background-color: #1D4ED8 !important;
 }
 
-/* Hide Streamlit's native "Clear value" control on number inputs. */
 div[data-testid="stNumberInput"] button[aria-label="Clear value"],
 div[data-testid="stNumberInputContainer"] button[aria-label="Clear value"],
 div[data-testid="stNumberInput"] [aria-label="Clear value"],
@@ -434,60 +431,8 @@ div[data-testid="stNumberInputContainer"] [aria-label="Clear value"] {
     pointer-events: none !important;
 }
 
-
-    /* ============================================================
-       SELECTBOX RIGHT-SIDE BUTTON — BLUE LIKE +/- BUTTONS
-       Applies to every Streamlit dropdown in the system.
-       ============================================================ */
-
-    /* Blue dropdown indicator/button area */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"],
-    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="indicator"],
-    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] {
-        background: #2563EB !important;
-        background-color: #2563EB !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #FFFFFF !important;
-    }
-
-    /* Make the blue dropdown button fill the selectbox height */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
-        height: 100% !important;
-        min-height: 40px !important;
-        border-radius: 0 8px 8px 0 !important;
-    }
-
-    /* White dropdown arrow */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child svg,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"] svg,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] svg {
-        color: #FFFFFF !important;
-        fill: #FFFFFF !important;
-        stroke: #FFFFFF !important;
-        opacity: 1 !important;
-    }
-
-    /* Keep internal indicator layers blue */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child > div,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"] > div {
-        background: #2563EB !important;
-        background-color: #2563EB !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
-
-    /* Slightly darker blue on hover */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child:hover,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"]:hover {
-        background: #1D4ED8 !important;
-        background-color: #1D4ED8 !important;
-    }
-
 /* ============================================================
-   SIDEBAR HAMBURGER — CLEAN SINGLE IMPLEMENTATION
+   SIDEBAR HAMBURGER
    ============================================================ */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="stExpandSidebarButton"],
@@ -564,49 +509,17 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     font-weight: 700 !important;
 }
 
-/* Light mode */
 .patient-snapshot .snapshot-label,
 .patient-snapshot .snapshot-value {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
 }
 
-/* Manual Streamlit Dark theme */
-[data-theme="dark"] .patient-snapshot .snapshot-label,
-[data-theme="dark"] .patient-snapshot .snapshot-value,
-.dark .patient-snapshot .snapshot-label,
-.dark .patient-snapshot .snapshot-value {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-
-/* Browser dark mode fallback */
-@media (prefers-color-scheme: dark) {
-    .patient-snapshot .snapshot-label,
-    .patient-snapshot .snapshot-value,
-    .patient-snapshot .section-title {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 750 !important;
-    }
-}
-
-/* Divider lines stay visible */
-.patient-snapshot hr {
-    border-color: #64748B !important;
-}
-/* ============================================================
-   FINAL SIDEBAR / SETTINGS LAYOUT
-   ============================================================ */
+/* Base side layout styling */
 [data-testid="stSidebar"] {
     width: 300px !important;
     min-width: 300px !important;
     max-width: 300px !important;
-}
-
-[data-testid="stToolbar"] {
-    display: flex !important;
-    visibility: visible !important;
 }
 
 [data-testid="stSidebarContent"] {
@@ -1273,10 +1186,6 @@ if get_theme_mode() == "Dark":
             border-color: #334155 !important;
         }
 
-        header[data-testid="stHeader"] {
-            background: #05070B !important;
-        }
-
         [data-testid="stSidebarCollapsedControl"] button::before,
         [data-testid="stExpandSidebarButton"] button::before,
         button[data-testid="stExpandSidebarButton"]::before,
@@ -1298,6 +1207,16 @@ if get_theme_mode() == "Dark":
 
         [data-testid="stRadio"] label {
             color: #E2E8F0 !important;
+        }
+
+        /* FORCE WHITE TEXT IN PATIENT SNAPSHOT (DARK MODE) */
+        .patient-snapshot,
+        .patient-snapshot *,
+        .patient-snapshot .snapshot-label,
+        .patient-snapshot .snapshot-value,
+        .patient-snapshot .section-title {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -2061,18 +1980,6 @@ elif st.session_state.view_mode == "result":
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        if get_theme_mode() == "Dark":
-            st.markdown("""
-            <style>
-                .patient-snapshot .snapshot-label,
-                .patient-snapshot .snapshot-value,
-                .patient-snapshot .section-title {
-                    color: #FFFFFF !important;
-                    -webkit-text-fill-color: #FFFFFF !important;
-                }
-            </style>
-            """, unsafe_allow_html=True)
-
     st.markdown("<div class='section-title'>💡 Health Insights & Recommendations</div>", unsafe_allow_html=True)
 
     rec1, rec2, rec3 = st.columns(3)
@@ -2203,16 +2110,12 @@ elif st.session_state.view_mode == "contact":
     """, unsafe_allow_html=True)
 
 # ============================================================
-# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES
+# FINAL SELECTBOX STYLE — CLEAN DROPDOWN AND CLEAR X
 # ============================================================
 st.markdown(r"""
 <style>
 
-/* ============================================================
-   ALL DROPDOWN / SELECTBOX OUTER BOXES
-   Same blue outline as the normal input boxes
-   ============================================================ */
-
+/* SELECTBOX CONTAINER */
 [data-testid="stSelectbox"] [data-baseweb="select"],
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
 [data-testid="stSelectbox"] [role="combobox"] {
@@ -2226,8 +2129,6 @@ st.markdown(r"""
     color: #0F172A !important;
 }
 
-/* Force ALL internal dropdown layers to stay white
-   and prevent the black/dark corners */
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
 [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
 [data-testid="stSelectbox"] [role="combobox"] > div {
@@ -2237,7 +2138,6 @@ st.markdown(r"""
     box-shadow: none !important;
 }
 
-/* Dropdown text */
 [data-testid="stSelectbox"] [data-baseweb="select"] span,
 [data-testid="stSelectbox"] [data-baseweb="select"] input,
 [data-testid="stSelectbox"] [role="combobox"],
@@ -2247,18 +2147,13 @@ st.markdown(r"""
     opacity: 1 !important;
 }
 
-/* Placeholder text */
 [data-testid="stSelectbox"] [data-baseweb="select"] input::placeholder {
     color: #64748B !important;
     -webkit-text-fill-color: #64748B !important;
     opacity: 1 !important;
 }
 
-/* ============================================================
-   DROPDOWN ARROW AREA
-   Keep it WHITE — no black block
-   ============================================================ */
-
+/* DROPDOWN ARROW AREA */
 [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
 [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
     background: #FFFFFF !important;
@@ -2268,17 +2163,12 @@ st.markdown(r"""
     box-shadow: none !important;
 }
 
-/* Arrow icon */
 [data-testid="stSelectbox"] [data-baseweb="select"] svg {
     color: #0F172A !important;
     fill: #0F172A !important;
     stroke: #0F172A !important;
     opacity: 1 !important;
 }
-
-/* ============================================================
-   FOCUS / CLICKED STATE
-   ============================================================ */
 
 [data-testid="stSelectbox"] [data-baseweb="select"]:focus-within,
 [data-testid="stSelectbox"] [role="combobox"]:focus-within {
@@ -2287,10 +2177,7 @@ st.markdown(r"""
     outline: none !important;
 }
 
-/* ============================================================
-   OPEN DROPDOWN MENU
-   ============================================================ */
-
+/* OPEN DROPDOWN MENU */
 div[data-baseweb="popover"],
 div[data-baseweb="menu"],
 ul[role="listbox"],
@@ -2303,7 +2190,6 @@ div[role="listbox"] {
     overflow: hidden !important;
 }
 
-/* Dropdown options */
 div[data-baseweb="menu"] li,
 div[data-baseweb="menu"] [role="option"],
 ul[role="listbox"] li,
@@ -2315,7 +2201,6 @@ div[role="listbox"] [role="option"] {
     border: none !important;
 }
 
-/* Hover / selected option */
 div[data-baseweb="menu"] li:hover,
 div[data-baseweb="menu"] [role="option"]:hover,
 ul[role="listbox"] li:hover,
@@ -2326,7 +2211,6 @@ div[role="listbox"] [role="option"]:hover {
     -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* Text inside hovered option */
 div[data-baseweb="menu"] li:hover *,
 div[data-baseweb="menu"] [role="option"]:hover *,
 ul[role="listbox"] li:hover *,
@@ -2335,18 +2219,37 @@ div[role="listbox"] [role="option"]:hover * {
     -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* ============================================================
-   REMOVE / HIDE CLEAR X WITHOUT CREATING A DARK BLOCK
-   ============================================================ */
-
+/* CLEAN "X" BUTTON WITHOUT BLUE CIRCLE/OUTER LAYER */
 [data-testid="stSelectbox"] [aria-label*="clear" i],
 [data-testid="stSelectbox"] [title*="clear" i],
 [data-testid="stSelectbox"] button[aria-label*="clear" i],
-[data-testid="stSelectbox"] button[title*="clear" i] {
+[data-testid="stSelectbox"] button[title*="clear" i],
+[data-testid="stSelectbox"] div[role="button"][aria-label*="clear" i] {
     background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
-    color: transparent !important;
+    outline: none !important;
+    padding: 0 4px !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0.65 !important;
+    transition: opacity 0.15s ease !important;
+}
+
+[data-testid="stSelectbox"] [aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] [title*="clear" i]:hover,
+[data-testid="stSelectbox"] button[aria-label*="clear" i]:hover,
+[data-testid="stSelectbox"] button[title*="clear" i]:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 1 !important;
 }
 
 [data-testid="stSelectbox"] [aria-label*="clear" i] svg,
@@ -2355,26 +2258,11 @@ div[role="listbox"] [role="option"]:hover * {
 [data-testid="stSelectbox"] button[title*="clear" i] svg {
     display: block !important;
     visibility: visible !important;
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
-    stroke: #FFFFFF !important;
-}
-
-/* Visible blue clear X button */
-[data-testid="stSelectbox"] button[aria-label*="clear" i],
-[data-testid="stSelectbox"] button[title*="clear" i],
-[data-testid="stSelectbox"] [aria-label*="clear" i],
-[data-testid="stSelectbox"] [title*="clear" i] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    border-radius: 50% !important;
-    width: 28px !important;
-    height: 28px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    opacity: 1 !important;
-    color: #FFFFFF !important;
+    color: #64748B !important;
+    fill: #64748B !important;
+    stroke: #64748B !important;
+    width: 14px !important;
+    height: 14px !important;
 }
 
 </style>
