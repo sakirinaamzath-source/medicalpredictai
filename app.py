@@ -681,32 +681,6 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-
-/* Completely remove Streamlit top-right menu */
-[data-testid="stMainMenu"] {
-    display: none !important;
-}
-
-/* Remove the top toolbar/header area */
-[data-testid="stToolbar"] {
-    display: none !important;
-}
-
-/* Remove Streamlit footer */
-[data-testid="stFooter"] {
-    display: none !important;
-}
-
-/* Remove blank space left by toolbar */
-header {
-    display: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 # ============================================================
 # 4. MODEL ASSETS
 # ============================================================
