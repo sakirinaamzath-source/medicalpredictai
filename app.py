@@ -434,6 +434,58 @@ div[data-testid="stNumberInputContainer"] [aria-label="Clear value"] {
     pointer-events: none !important;
 }
 
+
+    /* ============================================================
+       SELECTBOX RIGHT-SIDE BUTTON — BLUE LIKE +/- BUTTONS
+       Applies to every Streamlit dropdown in the system.
+       ============================================================ */
+
+    /* Blue dropdown indicator/button area */
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
+    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"],
+    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="indicator"],
+    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] {
+        background: #2563EB !important;
+        background-color: #2563EB !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Make the blue dropdown button fill the selectbox height */
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
+        height: 100% !important;
+        min-height: 40px !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    /* White dropdown arrow */
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child svg,
+    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"] svg,
+    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] svg {
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+        opacity: 1 !important;
+    }
+
+    /* Keep internal indicator layers blue */
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child > div,
+    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"] > div {
+        background: #2563EB !important;
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Slightly darker blue on hover */
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child:hover,
+    [data-testid="stSelectbox"] [data-baseweb="select"] [class*="IndicatorsContainer"]:hover {
+        background: #1D4ED8 !important;
+        background-color: #1D4ED8 !important;
+    }
+
 /* ============================================================
    SIDEBAR HAMBURGER — CLEAN SINGLE IMPLEMENTATION
    ============================================================ */
@@ -2148,7 +2200,7 @@ elif st.session_state.view_mode == "contact":
     """, unsafe_allow_html=True)
 
 # ============================================================
-# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES & BLUE BUTTON
+# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES
 # ============================================================
 st.markdown(r"""
 <style>
@@ -2169,11 +2221,10 @@ st.markdown(r"""
     box-shadow: none !important;
     outline: none !important;
     color: #0F172A !important;
-    overflow: hidden !important;
 }
 
 /* Force ALL internal dropdown layers to stay white
-   and prevent black/dark corners */
+   and prevent the black/dark corners */
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
 [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
 [data-testid="stSelectbox"] [role="combobox"] > div {
@@ -2201,32 +2252,25 @@ st.markdown(r"""
 }
 
 /* ============================================================
-   DROPDOWN ARROW AREA — BLUE BUTTON MATCHING +/- CONTROLS
+   DROPDOWN ARROW AREA
+   Keep it WHITE — no black block
    ============================================================ */
 
-div[data-baseweb="select"] > div:nth-child(2),
-div[data-baseweb="select"] > div:last-child,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
+    color: #0F172A !important;
     box-shadow: none !important;
 }
 
-/* Arrow icon color set to white */
-div[data-baseweb="select"] svg,
+/* Arrow icon */
 [data-testid="stSelectbox"] [data-baseweb="select"] svg {
-    color: #FFFFFF !important;
-    fill: #FFFFFF !important;
-    stroke: #FFFFFF !important;
+    color: #0F172A !important;
+    fill: #0F172A !important;
+    stroke: #0F172A !important;
     opacity: 1 !important;
-}
-
-/* Hover state for arrow button */
-div[data-baseweb="select"] > div:nth-child(2):hover,
-div[data-baseweb="select"] > div:last-child:hover {
-    background: #1D4ED8 !important;
-    background-color: #1D4ED8 !important;
 }
 
 /* ============================================================
