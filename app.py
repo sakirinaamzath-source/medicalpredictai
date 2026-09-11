@@ -2350,7 +2350,28 @@ div[role="listbox"] [role="option"]:hover * {
 [data-testid="stSelectbox"] [title*="clear" i] svg,
 [data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
 [data-testid="stSelectbox"] button[title*="clear" i] svg {
-    display: none !important;
+    display: block !important;
+    visibility: visible !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
+/* Visible blue clear X button */
+[data-testid="stSelectbox"] button[aria-label*="clear" i],
+[data-testid="stSelectbox"] button[title*="clear" i],
+[data-testid="stSelectbox"] [aria-label*="clear" i],
+[data-testid="stSelectbox"] [title*="clear" i] {
+    background: #2563EB !important;
+    background-color: #2563EB !important;
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    color: #FFFFFF !important;
 }
 
 </style>
