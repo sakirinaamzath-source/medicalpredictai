@@ -2148,43 +2148,41 @@ elif st.session_state.view_mode == "contact":
     """, unsafe_allow_html=True)
 
 # ============================================================
-# FINAL DOMAIN-SAFE SELECTBOX / CLEAR-X OVERRIDE
+# FINAL SELECTBOX STYLE — MATCH NORMAL INPUT BOXES
 # ============================================================
 st.markdown(r"""
 <style>
-/* ------------------------------------------------------------
-   SELECTBOX FRAME & CLOSED SELECTION BOX
-   ------------------------------------------------------------ */
+
+/* ============================================================
+   ALL DROPDOWN / SELECTBOX OUTER BOXES
+   Same blue outline as the normal input boxes
+   ============================================================ */
+
 [data-testid="stSelectbox"] [data-baseweb="select"],
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-[data-testid="stSelectbox"] [role="combobox"],
-select,
-.dropdown-select,
-.custom-select-container,
-div[class*="-control"] {
-    min-height: 42px !important;
-    height: 42px !important;
-    box-sizing: border-box !important;
+[data-testid="stSelectbox"] [role="combobox"] {
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
-    border: 1.5px solid #b2c8f8 !important; /* Blue outer border */
-    border-radius: 8px !important;           /* Rounded corners */
-    color: #1e293b !important;
+    border: 1.5px solid #b2c8f8 !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
     outline: none !important;
+    color: #0F172A !important;
+}
+
+/* Force ALL internal dropdown layers to stay white
+   and prevent the black/dark corners */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
+[data-testid="stSelectbox"] [role="combobox"] > div {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: none !important;
     box-shadow: none !important;
 }
 
-/* Ensure focus state turns active blue on click across all dropdowns */
-[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within,
-select:focus,
-.dropdown-select:focus,
-.custom-select-container:focus-within,
-div[class*="-control"]:focus-within {
-    border-color: #2563eb !important;        /* Active focus blue */
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-}
-
-/* Text inside closed selectbox */
+/* Dropdown text */
 [data-testid="stSelectbox"] [data-baseweb="select"] span,
 [data-testid="stSelectbox"] [data-baseweb="select"] input,
 [data-testid="stSelectbox"] [role="combobox"],
@@ -2194,46 +2192,51 @@ div[class*="-control"]:focus-within {
     opacity: 1 !important;
 }
 
-/* Hide internal cursor line inside closed selectbox */
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] [data-baseweb="select"] input[role="combobox"],
-[data-testid="stSelectbox"] [role="combobox"] input {
-    caret-color: transparent !important;
-    outline: none !important;
+/* Placeholder text */
+[data-testid="stSelectbox"] [data-baseweb="select"] input::placeholder {
+    color: #64748B !important;
+    -webkit-text-fill-color: #64748B !important;
+    opacity: 1 !important;
+}
+
+/* ============================================================
+   DROPDOWN ARROW AREA
+   Keep it WHITE — no black block
+   ============================================================ */
+
+[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: none !important;
+    color: #0F172A !important;
     box-shadow: none !important;
 }
 
-/* ------------------------------------------------------------
-   RIGHT-SIDE CONTROL AREA & ARROW
-   ------------------------------------------------------------ */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
-[data-testid="stSelectbox"] [role="combobox"] > div:last-child,
-.custom-select-container .dropdown-icon,
-.custom-select-container .select-arrow,
-div[class*="-IndicatorsContainer"] {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 100% !important;
-    background-color: transparent !important;
-    color: #64748b !important;
-}
-
-[data-testid="stSelectbox"] [data-baseweb="select"] svg,
-[data-testid="stSelectbox"] [role="combobox"] svg {
+/* Arrow icon */
+[data-testid="stSelectbox"] [data-baseweb="select"] svg {
     color: #0F172A !important;
     fill: #0F172A !important;
     stroke: #0F172A !important;
     opacity: 1 !important;
-    visibility: visible !important;
 }
 
-/* ------------------------------------------------------------
-   OPEN DROPDOWN MENU & POPOVER
-   ------------------------------------------------------------ */
+/* ============================================================
+   FOCUS / CLICKED STATE
+   ============================================================ */
+
+[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within,
+[data-testid="stSelectbox"] [role="combobox"]:focus-within {
+    border: 1.5px solid #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+    outline: none !important;
+}
+
+/* ============================================================
+   OPEN DROPDOWN MENU
+   ============================================================ */
+
 div[data-baseweb="popover"],
-div[data-baseweb="popover"] > div,
 div[data-baseweb="menu"],
 ul[role="listbox"],
 div[role="listbox"] {
@@ -2245,81 +2248,50 @@ div[role="listbox"] {
     overflow: hidden !important;
 }
 
-/* Individual options */
+/* Dropdown options */
 div[data-baseweb="menu"] li,
 div[data-baseweb="menu"] [role="option"],
 ul[role="listbox"] li,
-div[role="listbox"] [role="option"],
-div[data-baseweb="popover"] [role="option"] {
+div[role="listbox"] [role="option"] {
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
     border: none !important;
-    min-height: 36px !important;
-    padding: 8px 12px !important;
 }
 
-div[data-baseweb="menu"] li *,
-div[data-baseweb="menu"] [role="option"] *,
-ul[role="listbox"] li *,
-div[role="listbox"] [role="option"] *,
-div[data-baseweb="popover"] [role="option"] * {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-/* Hover & Selected Option: Highlighted Blue */
+/* Hover / selected option */
 div[data-baseweb="menu"] li:hover,
 div[data-baseweb="menu"] [role="option"]:hover,
 ul[role="listbox"] li:hover,
-div[role="listbox"] [role="option"]:hover,
-div[data-baseweb="menu"] [aria-selected="true"],
-div[data-baseweb="menu"] [role="option"][aria-selected="true"],
-div[role="listbox"] [aria-selected="true"],
-div[data-baseweb="popover"] [role="option"]:hover,
-div[data-baseweb="popover"] [role="option"][aria-selected="true"] {
+div[role="listbox"] [role="option"]:hover {
     background: #2563EB !important;
     background-color: #2563EB !important;
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
 }
 
+/* Text inside hovered option */
 div[data-baseweb="menu"] li:hover *,
 div[data-baseweb="menu"] [role="option"]:hover *,
 ul[role="listbox"] li:hover *,
-div[role="listbox"] [role="option"]:hover *,
-div[data-baseweb="menu"] [aria-selected="true"] *,
-div[role="listbox"] [aria-selected="true"] *,
-div[data-baseweb="popover"] [role="option"]:hover *,
-div[data-baseweb="popover"] [role="option"][aria-selected="true"] * {
+div[role="listbox"] [role="option"]:hover * {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* ------------------------------------------------------------
-   CLEAR X CONTROL OVERRIDE
-   ------------------------------------------------------------ */
+/* ============================================================
+   REMOVE / HIDE CLEAR X WITHOUT CREATING A DARK BLOCK
+   ============================================================ */
+
 [data-testid="stSelectbox"] [aria-label*="clear" i],
 [data-testid="stSelectbox"] [title*="clear" i],
 [data-testid="stSelectbox"] button[aria-label*="clear" i],
 [data-testid="stSelectbox"] button[title*="clear" i] {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-    padding: 0 !important;
-    margin: 0 2px !important;
-    border: 0 !important;
-    border-radius: 50% !important;
     background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
     color: transparent !important;
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
 }
 
 [data-testid="stSelectbox"] [aria-label*="clear" i] svg,
@@ -2327,19 +2299,7 @@ div[data-baseweb="popover"] [role="option"][aria-selected="true"] * {
 [data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
 [data-testid="stSelectbox"] button[title*="clear" i] svg {
     display: none !important;
-    visibility: hidden !important;
 }
 
-[data-testid="stSelectbox"] [aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] [title*="clear" i]::before,
-[data-testid="stSelectbox"] button[aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] button[title*="clear" i]::before {
-    content: "✕" !important;
-    position: absolute !important;
-    color: #0F172A !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-}
 </style>
 """, unsafe_allow_html=True)
