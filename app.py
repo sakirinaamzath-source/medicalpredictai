@@ -290,7 +290,7 @@ div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div,
 div[data-testid="stNumberInputContainer"] {
     background: white !important;
-    border: 1px solid #CBD5E1 !important;
+    border: 1.5px solid #b2c8f8 !important;
     border-radius: 10px !important;
 }
 
@@ -359,7 +359,7 @@ div[data-testid="stNumberInput"] > div,
 div[data-testid="stNumberInputContainer"] > div {
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
+    border: 1.5px solid #b2c8f8 !important;
     border-radius: 10px !important;
     overflow: hidden !important;
     box-shadow: none !important;
@@ -2157,15 +2157,31 @@ st.markdown(r"""
    ------------------------------------------------------------ */
 [data-testid="stSelectbox"] [data-baseweb="select"],
 [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-[data-testid="stSelectbox"] [role="combobox"] {
+[data-testid="stSelectbox"] [role="combobox"],
+select,
+.dropdown-select,
+.custom-select-container,
+div[class*="-control"] {
     min-height: 42px !important;
     height: 42px !important;
     box-sizing: border-box !important;
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
-    border-radius: 10px !important;
+    border: 1.5px solid #b2c8f8 !important; /* Blue outer border */
+    border-radius: 8px !important;           /* Rounded corners */
+    color: #1e293b !important;
+    outline: none !important;
     box-shadow: none !important;
+}
+
+/* Ensure focus state turns active blue on click across all dropdowns */
+[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within,
+select:focus,
+.dropdown-select:focus,
+.custom-select-container:focus-within,
+div[class*="-control"]:focus-within {
+    border-color: #2563eb !important;        /* Active focus blue */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 }
 
 /* Text inside closed selectbox */
@@ -2187,46 +2203,21 @@ st.markdown(r"""
     box-shadow: none !important;
 }
 
-/* Apply light blue border and rounded corners to every single dropdown in the system */
-select,
-.dropdown-select,
-.custom-select-container,
-div[class*="-control"] {
-  border: 1.5px solid #b2c8f8 !important; /* Light blue outer border */
-  border-radius: 8px !important;           /* Rounded corners matching other inputs */
-  background-color: #ffffff !important;    /* White background */
-  color: #1e293b !important;               /* Dark text */
-  outline: none !important;
-  box-sizing: border-box !important;
-}
-
-/* Ensure blue border stays active when clicking/focusing any dropdown */
-select:focus,
-.dropdown-select:focus,
-.custom-select-container:focus-within,
-div[class*="-control"]:focus-within {
-  border-color: #2563eb !important;        /* Darker blue border on click */
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-}
-
-/* Remove dark background panels from dropdown arrows/icons */
-.custom-select-container .dropdown-icon,
-.custom-select-container .select-arrow,
-div[class*="-IndicatorsContainer"] {
-  background-color: transparent !important;
-  color: #64748b !important;
-}
-
 /* ------------------------------------------------------------
    RIGHT-SIDE CONTROL AREA & ARROW
    ------------------------------------------------------------ */
 [data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
 [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
-[data-testid="stSelectbox"] [role="combobox"] > div:last-child {
+[data-testid="stSelectbox"] [role="combobox"] > div:last-child,
+.custom-select-container .dropdown-icon,
+.custom-select-container .select-arrow,
+div[class*="-IndicatorsContainer"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     height: 100% !important;
+    background-color: transparent !important;
+    color: #64748b !important;
 }
 
 [data-testid="stSelectbox"] [data-baseweb="select"] svg,
@@ -2239,9 +2230,7 @@ div[class*="-IndicatorsContainer"] {
 }
 
 /* ------------------------------------------------------------
-   OPEN DROPDOWN MENU & POPOVER (DOMAIN-SAFE)
-   Forces dropdown list items to stay white with dark text across
-   all environments, overriding global dark mode rules.
+   OPEN DROPDOWN MENU & POPOVER
    ------------------------------------------------------------ */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] > div,
