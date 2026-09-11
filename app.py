@@ -501,9 +501,8 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 }
 
 /* ============================================================
-   PATIENT SNAPSHOT — FORCE WHITE TEXT IN DARK MODE
+   PATIENT SNAPSHOT — DEFAULT LIGHT MODE STYLES
    ============================================================ */
-
 .patient-snapshot,
 .patient-snapshot * {
     font-weight: 700 !important;
@@ -1209,7 +1208,7 @@ if get_theme_mode() == "Dark":
             color: #E2E8F0 !important;
         }
 
-        /* FORCE WHITE TEXT IN PATIENT SNAPSHOT (DARK MODE) */
+        /* FORCE WHITE TEXT IN PATIENT SNAPSHOT (DARK MODE ONLY) */
         .patient-snapshot,
         .patient-snapshot *,
         .patient-snapshot .snapshot-label,
@@ -1217,6 +1216,10 @@ if get_theme_mode() == "Dark":
         .patient-snapshot .section-title {
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
+        }
+        
+        .patient-snapshot .snapshot-row {
+            border-bottom: 1px solid #334155 !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -1971,7 +1974,7 @@ elif st.session_state.view_mode == "result":
                 display_value = f"{value} µmol/L"
 
             st.markdown(
-                f"<div class='snapshot-row' style='padding:8px 0;border-bottom:1px solid #E2E8F0;'>"
+                f"<div class='snapshot-row' style='padding:8px 0;'>"
                 f"<span class='snapshot-label'>{pretty}</span>"
                 f"<span class='snapshot-value' style='float:right'>{display_value}</span>"
                 f"</div>",
