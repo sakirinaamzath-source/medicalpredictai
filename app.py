@@ -556,26 +556,31 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 }
 
 /* ============================================================
-   PATIENT SNAPSHOT — BOLDER DARK-MODE TEXT
+   PATIENT SNAPSHOT — FORCE WHITE TEXT IN DARK MODE
    ============================================================ */
+
 .patient-snapshot,
 .patient-snapshot * {
     font-weight: 700 !important;
 }
 
-.patient-snapshot .snapshot-label {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.01em !important;
-}
-
+/* Light mode */
+.patient-snapshot .snapshot-label,
 .patient-snapshot .snapshot-value {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
-    font-weight: 750 !important;
 }
 
+/* Manual Streamlit Dark theme */
+[data-theme="dark"] .patient-snapshot .snapshot-label,
+[data-theme="dark"] .patient-snapshot .snapshot-value,
+.dark .patient-snapshot .snapshot-label,
+.dark .patient-snapshot .snapshot-value {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Browser dark mode fallback */
 @media (prefers-color-scheme: dark) {
     .patient-snapshot .snapshot-label,
     .patient-snapshot .snapshot-value,
@@ -586,12 +591,10 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     }
 }
 
-.result-snapshot-text {
-    color: #FFFFFF !important;
-    font-weight: 750 !important;
-    font-size: 0.95rem !important;
+/* Divider lines stay visible */
+.patient-snapshot hr {
+    border-color: #64748B !important;
 }
-
 /* ============================================================
    FINAL SIDEBAR / SETTINGS LAYOUT
    ============================================================ */
@@ -675,6 +678,32 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     padding: 0 !important;
     margin: 0 !important;
 }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+
+/* Completely remove Streamlit top-right menu */
+[data-testid="stMainMenu"] {
+    display: none !important;
+}
+
+/* Remove the top toolbar/header area */
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+/* Remove Streamlit footer */
+[data-testid="stFooter"] {
+    display: none !important;
+}
+
+/* Remove blank space left by toolbar */
+header {
+    display: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
