@@ -2187,6 +2187,36 @@ st.markdown(r"""
     box-shadow: none !important;
 }
 
+/* Apply light blue border and rounded corners to every single dropdown in the system */
+select,
+.dropdown-select,
+.custom-select-container,
+div[class*="-control"] {
+  border: 1.5px solid #b2c8f8 !important; /* Light blue outer border */
+  border-radius: 8px !important;           /* Rounded corners matching other inputs */
+  background-color: #ffffff !important;    /* White background */
+  color: #1e293b !important;               /* Dark text */
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure blue border stays active when clicking/focusing any dropdown */
+select:focus,
+.dropdown-select:focus,
+.custom-select-container:focus-within,
+div[class*="-control"]:focus-within {
+  border-color: #2563eb !important;        /* Darker blue border on click */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Remove dark background panels from dropdown arrows/icons */
+.custom-select-container .dropdown-icon,
+.custom-select-container .select-arrow,
+div[class*="-IndicatorsContainer"] {
+  background-color: transparent !important;
+  color: #64748b !important;
+}
+
 /* ------------------------------------------------------------
    RIGHT-SIDE CONTROL AREA & ARROW
    ------------------------------------------------------------ */
