@@ -3618,9 +3618,14 @@ st.markdown(r"""
 <style>
 /* Match every closed dropdown to the normal white input box. */
 [data-testid="stSelectbox"] div[data-baseweb="select"],
-[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div > div,
+[data-testid="stSelectbox"] div[data-baseweb="select"] [data-baseweb="value-container"],
+[data-testid="stSelectbox"] div[data-baseweb="select"] [role="combobox"] {
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    color-scheme: light !important;
     border: 1px solid #CBD5E1 !important;
     border-color: #CBD5E1 !important;
     border-radius: 10px !important;
@@ -3633,18 +3638,22 @@ st.markdown(r"""
 /* Keep the dropdown text readable just like normal inputs. */
 [data-testid="stSelectbox"] div[data-baseweb="select"] span,
 [data-testid="stSelectbox"] div[data-baseweb="select"] input,
-[data-testid="stSelectbox"] div[data-baseweb="select"] [data-baseweb="value-container"] {
+[data-testid="stSelectbox"] div[data-baseweb="select"] [data-baseweb="value-container"],
+[data-testid="stSelectbox"] div[data-baseweb="select"] [role="combobox"] {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
     opacity: 1 !important;
     background: transparent !important;
+    background-color: transparent !important;
 }
 
-/* Keep the arrow and clear X dark on the white box. */
-[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+/* Keep the arrow dark on the white box. */
+[data-testid="stSelectbox"] div[data-baseweb="select"] svg,
+[data-testid="stSelectbox"] div[data-baseweb="select"] path {
     color: #0F172A !important;
     fill: #0F172A !important;
     stroke: #0F172A !important;
+    opacity: 1 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -3675,5 +3684,4 @@ if get_theme_mode() == "Dark":
         }
     </style>
     """, unsafe_allow_html=True)
-
 
