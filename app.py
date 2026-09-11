@@ -514,24 +514,6 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     -webkit-text-fill-color: #0F172A !important;
 }
 
-/* ============================================================
-   PATIENT SNAPSHOT — DARK MODE OVERRIDES
-   ============================================================ */
-@media (prefers-color-scheme: dark) {
-  .patient-snapshot .snapshot-label,
-  .patient-snapshot .snapshot-value {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-  }
-}
-
-[data-theme="dark"] .patient-snapshot .snapshot-label,
-[data-theme="dark"] .patient-snapshot .snapshot-value,
-.dark .patient-snapshot .snapshot-label,
-.dark .patient-snapshot .snapshot-value {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
 
 /* Base side layout styling */
 [data-testid="stSidebar"] {
@@ -1227,16 +1209,7 @@ if get_theme_mode() == "Dark":
             color: #E2E8F0 !important;
         }
 
-        /* FORCE WHITE TEXT IN PATIENT SNAPSHOT (DARK MODE ONLY) */
-        .patient-snapshot,
-        .patient-snapshot *,
-        .patient-snapshot .snapshot-label,
-        .patient-snapshot .snapshot-value,
-        .patient-snapshot .section-title {
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }
-        
+
         .patient-snapshot .snapshot-row {
             border-bottom: 1px solid #334155 !important;
         }
@@ -1994,8 +1967,8 @@ elif st.session_state.view_mode == "result":
 
             st.markdown(
                 f"<div class='snapshot-row' style='padding:8px 0;'>"
-                f"<span class='snapshot-label'>{pretty}</span>"
-                f"<span class='snapshot-value' style='float:right'>{display_value}</span>"
+                f"<span class='snapshot-label' style='color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;'>{pretty}</span>"
+                f"<span class='snapshot-value' style='float:right;color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;'>{display_value}</span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
