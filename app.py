@@ -2933,10 +2933,6 @@ elif st.session_state.view_mode == "contact":
 # ============================================================
 # FINAL DOMAIN-SAFE SELECTBOX / CLEAR-X OVERRIDE
 # ============================================================
-# Keep every disease selectbox visually identical on localhost and
-# deployed domains.  Streamlit/BaseWeb/react-aria have changed the
-# internal markup over time, so the rules below intentionally cover
-# both the older BaseWeb selectbox and newer selectbox markup.
 st.markdown(r"""
 <style>
 /* ------------------------------------------------------------
@@ -2957,306 +2953,27 @@ st.markdown(r"""
 
 /* All selectbox text remains dark on the white field. */
 [data-testid="stSelectbox"] [data-baseweb="select"] span,
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] [role="combobox"],
-[data-testid="stSelectbox"] [role="combobox"] * {
+[data-testid="stSelectbox"] [data-baseweb="select"] div {
     color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
 }
 
-/* Hide the internal text caret that appears as a vertical line
-   inside an empty selectbox such as Gender. */
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] [data-baseweb="select"] input[role="combobox"],
-[data-testid="stSelectbox"] [role="combobox"] input {
-    caret-color: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* ------------------------------------------------------------
-   RIGHT-SIDE CONTROL AREA
-   ------------------------------------------------------------ */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div:last-child,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="select-arrow"],
-[data-testid="stSelectbox"] [role="combobox"] > div:last-child {
+/* Fix "X" clear icon vertical centering inside selectbox containers */
+[data-testid="stSelectbox"] [aria-label="Clear value"],
+[data-testid="stSelectbox"] [data-baseweb="select"] svg[title="Clear value"],
+[data-testid="stSelectbox"] [data-baseweb="icon"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 100% !important;
-}
-
-/* Normal dropdown arrow: always a clean dark-blue/black arrow. */
-[data-testid="stSelectbox"] [data-baseweb="select"] svg,
-[data-testid="stSelectbox"] [role="combobox"] svg {
-    color: #0F172A !important;
-    fill: #0F172A !important;
-    stroke: #0F172A !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* ------------------------------------------------------------
-   CLEAR X
-   BaseWeb uses a clear icon when a value is selected. Some
-   Streamlit versions render it as a button, others as a wrapper.
-   Hide the broken SVG and draw a consistent, centered X instead.
-   ------------------------------------------------------------ */
-[data-testid="stSelectbox"] [aria-label*="clear" i],
-[data-testid="stSelectbox"] [title*="clear" i],
-[data-testid="stSelectbox"] button[aria-label*="clear" i],
-[data-testid="stSelectbox"] button[title*="clear" i] {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-    padding: 0 !important;
-    margin: 0 2px !important;
-    border: 0 !important;
-    border-radius: 50% !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: transparent !important;
+    align-self: center !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    top: 0 !important;
     position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-}
-
-[data-testid="stSelectbox"] [aria-label*="clear" i] svg,
-[data-testid="stSelectbox"] [title*="clear" i] svg,
-[data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
-[data-testid="stSelectbox"] button[title*="clear" i] svg {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-[data-testid="stSelectbox"] [aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] [title*="clear" i]::before,
-[data-testid="stSelectbox"] button[aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] button[title*="clear" i]::before {
-    content: "×" !important;
-    display: block !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 20px !important;
-    font-weight: 500 !important;
-    line-height: 28px !important;
-    text-align: center !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-[data-testid="stSelectbox"] [aria-label*="clear" i]:hover,
-[data-testid="stSelectbox"] [title*="clear" i]:hover,
-[data-testid="stSelectbox"] button[aria-label*="clear" i]:hover,
-[data-testid="stSelectbox"] button[title*="clear" i]:hover {
-    background: #E2E8F0 !important;
-}
-
-/* Prevent the clear icon and arrow from being accidentally turned
-   into filled circles by broad SVG rules elsewhere in the app. */
-[data-testid="stSelectbox"] [aria-label*="clear" i] * ,
-[data-testid="stSelectbox"] [title*="clear" i] * {
-    box-sizing: border-box !important;
-}
-
-/* ------------------------------------------------------------
-   OPEN DROPDOWN — SAME GEOMETRY FOR EVERY DISEASE
-   ------------------------------------------------------------ */
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-[data-testid="stSelectboxVirtualDropdown"],
-[data-testid="stSelectboxVirtualDropdown"] > div,
-[role="listbox"] {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18) !important;
-    overflow: hidden !important;
-    z-index: 999999 !important;
-}
-
-[data-baseweb="menu"] [role="option"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"],
-[role="listbox"] [role="option"] {
-    min-height: 40px !important;
-    box-sizing: border-box !important;
-    padding: 9px 12px !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    border: 0 !important;
-}
-
-[data-baseweb="menu"] [role="option"] *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
-[role="listbox"] [role="option"] * {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-[data-baseweb="menu"] [role="option"]:hover,
-[data-baseweb="menu"] [role="option"][aria-selected="true"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
-[role="listbox"] [role="option"]:hover,
-[role="listbox"] [role="option"][aria-selected="true"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-
-[data-baseweb="menu"] [role="option"]:hover *,
-[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
-[role="listbox"] [role="option"]:hover *,
-[role="listbox"] [role="option"][aria-selected="true"] * {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-
-/* ------------------------------------------------------------
-   DARK MODE: THE SELECTBOX ITSELF STAYS WHITE, exactly like the
-   original design requested. The X and arrow stay dark for contrast.
-   ------------------------------------------------------------ */
-[data-theme="dark"] [data-testid="stSelectbox"] [data-baseweb="select"],
-.dark [data-testid="stSelectbox"] [data-baseweb="select"],
-body.dark [data-testid="stSelectbox"] [data-baseweb="select"] {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-}
-
-/* ------------------------------------------------------------
-   FIX BASEWEB/STREAMLIT DROPDOWN INTERNAL SEARCH INPUT
-   Some Streamlit/BaseWeb versions render an internal input inside
-   the opened menu. Broad input CSS can make it appear as a strange
-   blue/white bar at the bottom of the dropdown. Selectboxes here
-   use normal option picking, so hide that internal menu input only.
-   This applies to every disease selectbox.
-   ------------------------------------------------------------ */
-[data-baseweb="popover"] input,
-[data-baseweb="popover"] [data-baseweb="input"],
-[data-baseweb="menu"] input,
-[data-baseweb="menu"] [data-baseweb="input"],
-[data-testid="stSelectboxVirtualDropdown"] input,
-[data-testid="stSelectboxVirtualDropdown"] [data-baseweb="input"],
-[role="listbox"] input,
-[role="listbox"] [data-baseweb="input"] {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-/* Remove any focus ring that a hidden menu input may leave behind. */
-[data-baseweb="popover"] [data-baseweb="input"] > div,
-[data-baseweb="menu"] [data-baseweb="input"] > div,
-[data-testid="stSelectboxVirtualDropdown"] [data-baseweb="input"] > div,
-[role="listbox"] [data-baseweb="input"] > div {
-    display: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-/* Keep the dropdown itself clean and fully visible. */
-[data-baseweb="popover"] [data-baseweb="menu"],
-[data-testid="stSelectboxVirtualDropdown"],
-[data-testid="stSelectboxVirtualDropdown"] > div,
-[role="listbox"] {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-}
-
-/* A selected value gets one clean, centered X. */
-[data-testid="stSelectbox"] button[aria-label*="clear" i],
-[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i],
-[data-testid="stSelectbox"] [title*="clear" i] {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex: 0 0 28px !important;
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-    margin: 0 2px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-[data-testid="stSelectbox"] button[aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i]::before,
-[data-testid="stSelectbox"] [title*="clear" i]::before {
-    content: "×" !important;
-    position: absolute !important;
-    inset: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 21px !important;
-    font-weight: 400 !important;
-    line-height: 1 !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-[data-testid="stSelectbox"] button[aria-label*="clear" i] svg,
-[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i] svg,
-[data-testid="stSelectbox"] [title*="clear" i] svg {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-[data-testid="stSelectbox"] button[aria-label*="clear" i]:hover,
-[data-testid="stSelectbox"] [role="button"][aria-label*="clear" i]:hover,
-[data-testid="stSelectbox"] [title*="clear" i]:hover {
-    background: #E2E8F0 !important;
-    border-radius: 50% !important;
-}
-
-/* ------------------------------------------------------------
-   DOMAIN / RESPONSIVE SAFETY
-   Prevent the select controls from being clipped or shifting on
-   hosted domains with different viewport widths or browser zoom.
-   ------------------------------------------------------------ */
-[data-testid="stSelectbox"] {
-    width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-}
-
-[data-testid="stSelectbox"] > div,
-[data-testid="stSelectbox"] [data-baseweb="select"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
 }
 </style>
 """, unsafe_allow_html=True)
-
-
-# ============================================================
-# FINAL DROPDOWN SEARCH INPUT CLEANUP
-# ============================================================
-
 
 # ============================================================
 # FINAL DROPDOWN SEARCH INPUT CLEANUP
