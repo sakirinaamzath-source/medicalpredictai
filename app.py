@@ -316,7 +316,7 @@ hr {
 }
 
 .stTabs [data-baseweb="tab"] {
-    border-radius: 9px;
+    border-radius: 99px;
     padding: 8px 15px;
     font-weight: 700;
 }
@@ -604,7 +604,7 @@ button[data-testid="stBaseButton-headerNoPadding"] span {
     line-height: 0 !important;
 }
 
-/* Draw our own three lines. */
+/* Draw our own three lines in LIGHT BLUE for light mode. */
 [data-testid="stSidebarCollapsedControl"] button::before,
 [data-testid="stExpandSidebarButton"] button::before,
 button[data-testid="stExpandSidebarButton"]::before,
@@ -616,8 +616,8 @@ button[data-testid="stBaseButton-headerNoPadding"]::before {
     width: 22px !important;
     height: 3px !important;
     border-radius: 3px !important;
-    background: #000000 !important;
-    box-shadow: 0 7px 0 #000000, 0 14px 0 #000000 !important;
+    background: #38BDF8 !important;
+    box-shadow: 0 7px 0 #38BDF8, 0 14px 0 #38BDF8 !important;
     display: block !important;
 }
 
@@ -626,13 +626,13 @@ button[data-testid="stBaseButton-headerNoPadding"]::before {
 [data-testid="stExpandSidebarButton"] button:hover,
 button[data-testid="stExpandSidebarButton"]:hover,
 button[data-testid="stBaseButton-headerNoPadding"]:hover {
-    background: rgba(37, 99, 235, 0.08) !important;
+    background: rgba(56, 189, 248, 0.12) !important;
 }
 
 /* ============================================================
-       PATIENT SNAPSHOT — BOLDER DARK-MODE TEXT
+       PATIENT SNAPSHOT — LIGHT BLUE IN ALL MODES & DISEASES
 ============================================================ */
-   /* Patient Snapshot Styles */
+/* Patient Snapshot Styles */
 .patient-snapshot,
 .patient-snapshot * {
     font-weight: 700 !important;
@@ -652,14 +652,9 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     font-weight: 750 !important;
 }
 
-/* Remove dark mode override to keep light blue consistent in both themes */
-@media (prefers-color-scheme: dark) {
-    .patient-snapshot .snapshot-label,
-    .patient-snapshot .snapshot-value,
-    .patient-snapshot .section-title {
-        color: #38BDF8 !important;
-        -webkit-text-fill-color: #38BDF8 !important;
-    }
+.patient-snapshot .section-title {
+    color: #38BDF8 !important;
+    -webkit-text-fill-color: #38BDF8 !important;
 }
 
 /* ============================================================
@@ -1620,13 +1615,13 @@ if get_theme_mode() == "Dark":
             background: #05070B !important;
         }
 
-        /* Hamburger is white when the app's own Dark theme is selected. */
+        /* Hamburger is light blue in dark mode as well. */
         [data-testid="stSidebarCollapsedControl"] button::before,
         [data-testid="stExpandSidebarButton"] button::before,
         button[data-testid="stExpandSidebarButton"]::before,
         button[data-testid="stBaseButton-headerNoPadding"]::before {
-            background: #FFFFFF !important;
-            box-shadow: 0 7px 0 #FFFFFF, 0 14px 0 #FFFFFF !important;
+            background: #38BDF8 !important;
+            box-shadow: 0 7px 0 #38BDF8, 0 14px 0 #38BDF8 !important;
         }
 
         [data-testid="stSidebarCollapsedControl"] button:hover,
@@ -1939,13 +1934,13 @@ elif get_theme_mode() == "Auto":
                         background: #05070B !important;
                     }
 
-                    /* Hamburger is white when the app's own Dark theme is selected. */
+                    /* Hamburger is light blue when dark mode active. */
                     [data-testid="stSidebarCollapsedControl"] button::before,
                     [data-testid="stExpandSidebarButton"] button::before,
                     button[data-testid="stExpandSidebarButton"]::before,
                     button[data-testid="stBaseButton-headerNoPadding"]::before {
-                        background: #FFFFFF !important;
-                        box-shadow: 0 7px 0 #FFFFFF, 0 14px 0 #FFFFFF !important;
+                        background: #38BDF8 !important;
+                        box-shadow: 0 7px 0 #38BDF8, 0 14px 0 #38BDF8 !important;
                     }
 
                     [data-testid="stSidebarCollapsedControl"] button:hover,
@@ -2776,18 +2771,6 @@ elif st.session_state.view_mode == "result":
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        if get_theme_mode() == "Dark":
-            st.markdown("""
-            <style>
-                .patient-snapshot .snapshot-label,
-                .patient-snapshot .snapshot-value,
-                .patient-snapshot .section-title {
-                    color: #FFFFFF !important;
-                    -webkit-text-fill-color: #FFFFFF !important;
-                }
-            </style>
-            """, unsafe_allow_html=True)
-
     # Recommendations
     st.markdown("<div class='section-title'>💡 Health Insights & Recommendations</div>", unsafe_allow_html=True)
 
@@ -3053,417 +3036,9 @@ st.markdown(r"""
 [data-baseweb="popover"] [role="option"]:hover,
 [data-baseweb="menu"] [role="option"]:hover,
 [data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
-[role="listbox"] [role="option"]:hover,
-[data-baseweb="popover"] [role="option"][aria-selected="true"],
-[data-baseweb="menu"] [role="option"][aria-selected="true"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
-[role="listbox"] [role="option"][aria-selected="true"] {
+[role="listbox"] [role="option"]:hover {
     background: #2563EB !important;
     color: #FFFFFF !important;
-}
-
-[data-baseweb="popover"] [role="option"]:hover *,
-[data-baseweb="menu"] [role="option"]:hover *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
-[role="listbox"] [role="option"]:hover *,
-[data-baseweb="popover"] [role="option"][aria-selected="true"] *,
-[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
-[role="listbox"] [role="option"][aria-selected="true"] * {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ============================================================
-# FINAL SELECTBOX HOVER FIX
-# ============================================================
-# BaseWeb renders an inner div inside each option. Earlier global
-# selectbox rules were forcing that inner div to stay white, so when
-# the mouse hovered an option the parent became blue while a white
-# rectangle remained inside it. Keep the inner option layers in sync
-# with the hovered/selected option instead.
-st.markdown(r"""
-<style>
-/* The option's immediate inner wrapper must not keep a white background
-   when the option itself is blue. */
-[data-baseweb="menu"] [role="option"] > div:hover,
-[data-baseweb="menu"] [role="option"]:hover > div,
-[data-baseweb="menu"] [role="option"][aria-selected="true"] > div,
-[data-baseweb="popover"] [role="option"]:hover > div,
-[data-baseweb="popover"] [role="option"][aria-selected="true"] > div,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover > div,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] > div,
-[role="listbox"] [role="option"]:hover > div,
-[role="listbox"] [role="option"][aria-selected="true"] > div {
-    background: inherit !important;
-    background-color: inherit !important;
-    color: inherit !important;
-    -webkit-text-fill-color: inherit !important;
-}
-
-/* Do not let any nested option wrapper create a second white box. */
-[data-baseweb="menu"] [role="option"]:hover > div > div,
-[data-baseweb="menu"] [role="option"][aria-selected="true"] > div > div,
-[data-baseweb="popover"] [role="option"]:hover > div > div,
-[data-baseweb="popover"] [role="option"][aria-selected="true"] > div > div,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover > div > div,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] > div > div,
-[role="listbox"] [role="option"]:hover > div > div,
-[role="listbox"] [role="option"][aria-selected="true"] > div > div {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-/* The actual option row remains the single blue hover surface. */
-[data-baseweb="menu"] [role="option"]:hover,
-[data-baseweb="popover"] [role="option"]:hover,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
-[role="listbox"] [role="option"]:hover,
-[data-baseweb="menu"] [role="option"][aria-selected="true"],
-[data-baseweb="popover"] [role="option"][aria-selected="true"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
-[role="listbox"] [role="option"][aria-selected="true"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# CLEAR-BUTTON TOOLTIP — CONSISTENT IN LIGHT + DARK MODES
-# Keep the tooltip box neutral grey, but make its text white.
-# ============================================================
-st.markdown("""
-<style>
-[data-testid="stTooltipContent"],
-[data-testid="stTooltipContent"] > div,
-[data-baseweb="tooltip"],
-[data-baseweb="tooltip"] > div {
-    background: #374151 !important;
-    background-color: #374151 !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    border: none !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
-}
-
-[data-testid="stTooltipContent"] *,
-[data-baseweb="tooltip"] * {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-
-# ============================================================
-# ONLY CHANGE REQUESTED: REMOVE THE THREE-DOT MENU
-# Keep Deploy and the sidebar hamburger unchanged.
-# ============================================================
-st.markdown("""
-<style>
-/* Streamlit main three-dot menu */
-[data-testid="stMainMenu"],
-button[aria-label="Main menu"],
-button[aria-label="Main Menu"] {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# FINAL FIX: REMOVE THE VERTICAL CARET/LINE INSIDE SELECTBOXES
-# This is intentionally the ONLY change in this version.
-# ============================================================
-st.markdown(r"""
-<style>
-/* Streamlit/BaseWeb keeps a tiny internal input inside selectboxes.
-   Hide its visual caret/border without disabling the selectbox. */
-div[data-testid="stSelectbox"] div[data-baseweb="select"] input,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] input[role="combobox"] {
-    caret-color: transparent !important;
-    -webkit-caret-color: transparent !important;
-    border: 0 !important;
-    border-left: 0 !important;
-    border-right: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    width: 1px !important;
-    min-width: 1px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Prevent the internal input from drawing a focus ring/line. */
-div[data-testid="stSelectbox"] div[data-baseweb="select"] input:focus,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] input:focus-visible {
-    caret-color: transparent !important;
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-
-# ============================================================
-# FINAL SELECTBOX TEXT / PLACEHOLDER FIX
-# Keep the placeholder visible when no option is selected, and
-# keep the selected option visible after the user chooses one.
-# Apply consistently to every selectbox in the app.
-# ============================================================
-st.markdown(r"""
-<style>
-/* Never hide the selectbox's real text input. */
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] input[role="combobox"] {
-    opacity: 1 !important;
-    visibility: visible !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    background: transparent !important;
-    caret-color: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Make the placeholder readable in every selectbox. */
-[data-testid="stSelectbox"] [data-baseweb="select"] input::placeholder,
-[data-testid="stSelectbox"] input[role="combobox"]::placeholder {
-    color: #64748B !important;
-    -webkit-text-fill-color: #64748B !important;
-    opacity: 1 !important;
-}
-
-/* Streamlit/BaseWeb may render the placeholder or selected value as
-   a separate text node instead of the input's placeholder. Keep both
-   states visible. */
-[data-testid="stSelectbox"] [data-baseweb="select"] span,
-[data-testid="stSelectbox"] [data-baseweb="select"] [aria-selected="true"],
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* The empty-field placeholder is also allowed to remain visible. */
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-placeholder="true"],
-[data-testid="stSelectbox"] [data-baseweb="select"] [class*="placeholder"] {
-    color: #64748B !important;
-    -webkit-text-fill-color: #64748B !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* Do not let the clear control cover the selected value. */
-[data-testid="stSelectbox"] [aria-label*="clear" i],
-[data-testid="stSelectbox"] [title*="clear" i] {
-    flex: 0 0 28px !important;
-}
-
-/* Every dropdown option remains visible and readable. */
-[data-baseweb="menu"] [role="option"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"],
-[role="listbox"] [role="option"] {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-[data-baseweb="menu"] [role="option"] *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
-[role="listbox"] [role="option"] * {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* Selected/hovered option: blue background + white text. */
-[data-baseweb="menu"] [role="option"]:hover,
-[data-baseweb="menu"] [role="option"][aria-selected="true"],
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
-[role="listbox"] [role="option"]:hover,
-[role="listbox"] [role="option"][aria-selected="true"] {
-    background: #2563EB !important;
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-
-[data-baseweb="menu"] [role="option"]:hover *,
-[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
-[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
-[role="listbox"] [role="option"]:hover *,
-[role="listbox"] [role="option"][aria-selected="true"] * {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ============================================================
-# FINAL UI FIX: MAKE DROPDOWN BOXES MATCH NORMAL INPUT BOXES
-# Only changes the closed selectbox appearance. No prediction,
-# validation, XAI, or dropdown-option behaviour is changed.
-# ============================================================
-st.markdown(r"""
-<style>
-/* Match every closed dropdown to the normal white input box. */
-[data-testid="stSelectbox"] div[data-baseweb="select"],
-[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
-    border-color: #CBD5E1 !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    min-height: 42px !important;
-    height: 42px !important;
-    box-sizing: border-box !important;
-}
-
-/* Keep the dropdown text readable just like normal inputs. */
-[data-testid="stSelectbox"] div[data-baseweb="select"] span,
-[data-testid="stSelectbox"] div[data-baseweb="select"] input,
-[data-testid="stSelectbox"] div[data-baseweb="select"] [data-baseweb="value-container"] {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    background: transparent !important;
-}
-
-/* Keep the arrow and clear X dark on the white box. */
-[data-testid="stSelectbox"] div[data-baseweb="select"] svg {
-    color: #0F172A !important;
-    fill: #0F172A !important;
-    stroke: #0F172A !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ============================================================
-# PATIENT SNAPSHOT — PURE WHITE TEXT IN DARK MODE
-# Scoped only to the Patient Snapshot card.
-# ============================================================
-if get_theme_mode() == "Dark":
-    st.markdown(r"""
-    <style>
-        .patient-snapshot,
-        .patient-snapshot * {
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }
-
-        .patient-snapshot span,
-        .patient-snapshot span[style*="color"],
-        .patient-snapshot div[style*="color"] {
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }
-
-        .patient-snapshot .section-title {
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-# ============================================================
-# FINAL DOMAIN DROPDOWN FIX — FORCE CLOSED SELECTBOX WHITE
-# Only fixes the closed selectbox appearance. Everything else is unchanged.
-# ============================================================
-st.markdown(r"""
-<style>
-/* Force the complete CLOSED BaseWeb selectbox shell to match normal inputs. */
-[data-testid="stSelectbox"] [data-baseweb="select"],
-[data-testid="stSelectbox"] [data-baseweb="select"] > div,
-[data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
-[data-testid="stSelectbox"] [data-baseweb="value-container"],
-[data-testid="stSelectbox"] [role="combobox"] {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border-color: #CBD5E1 !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-    box-shadow: none !important;
-}
-
-/* Catch BaseWeb's nested layers that can become dark on the deployed domain. */
-[data-testid="stSelectbox"] [data-baseweb="select"] > div > div > div,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] > div {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-}
-
-/* Selected value / placeholder text inside the CLOSED field. */
-[data-testid="stSelectbox"] [data-baseweb="select"] span,
-[data-testid="stSelectbox"] [data-baseweb="select"] input,
-[data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] *,
-[data-testid="stSelectbox"] [data-baseweb="select"] [role="combobox"] * {
-    color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
-    opacity: 1 !important;
-}
-
-/* Keep the arrow black on the white field. */
-[data-testid="stSelectbox"] [data-baseweb="select"] svg,
-[data-testid="stSelectbox"] [data-baseweb="select"] path {
-    color: #0F172A !important;
-    fill: #0F172A !important;
-    stroke: #0F172A !important;
-    opacity: 1 !important;
-}
-
-/* Never let the browser/app dark theme recolor the CLOSED field. */
-@media (prefers-color-scheme: dark) {
-    [data-testid="stSelectbox"] [data-baseweb="select"],
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div,
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div > div,
-    [data-testid="stSelectbox"] [data-baseweb="value-container"],
-    [data-testid="stSelectbox"] [data-baseweb="value-container"] > div,
-    [data-testid="stSelectbox"] [role="combobox"] {
-        background: #FFFFFF !important;
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-        border-color: #CBD5E1 !important;
-    }
-
-    [data-testid="stSelectbox"] [data-baseweb="select"] span,
-    [data-testid="stSelectbox"] [data-baseweb="select"] input,
-    [data-testid="stSelectbox"] [data-baseweb="select"] [data-baseweb="value-container"] * {
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-    }
-
-    [data-testid="stSelectbox"] [data-baseweb="select"] svg,
-    [data-testid="stSelectbox"] [data-baseweb="select"] path {
-        color: #0F172A !important;
-        fill: #0F172A !important;
-        stroke: #0F172A !important;
-    }
 }
 </style>
 """, unsafe_allow_html=True)
