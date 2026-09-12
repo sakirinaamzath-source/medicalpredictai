@@ -16,6 +16,15 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.markdown(
+    """
+    <style>
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # ============================================================
 # 2. SESSION STATE
 # ============================================================
@@ -630,7 +639,7 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 }
 
 /* ============================================================
-       PATIENT SNAPSHOT — LIGHT BLUE IN ALL MODES & DISEASES
+        PATIENT SNAPSHOT — LIGHT BLUE IN ALL MODES & DISEASES
 ============================================================ */
 /* Patient Snapshot Styles */
 .patient-snapshot,
@@ -658,9 +667,9 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 }
 
 /* ============================================================
-   FINAL SIDEBAR / SETTINGS LAYOUT
-   Always-open sidebar matching the dashboard reference.
-   ============================================================ */
+    FINAL SIDEBAR / SETTINGS LAYOUT
+    Always-open sidebar matching the dashboard reference.
+    ============================================================ */
 [data-testid="stSidebar"] {
     width: 300px !important;
     min-width: 300px !important;
@@ -748,12 +757,11 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     margin: 0 !important;
 }
 
-
 /* Keep header available for the sidebar toggle. */
 [data-testid="stToolbar"] { display: flex !important; visibility: visible !important; }
-
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,)
 
 # ============================================================
 # 4. MODEL ASSETS
