@@ -501,8 +501,9 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 }
 
 /* ============================================================
-   PATIENT SNAPSHOT — DEFAULT LIGHT MODE STYLES
+   PATIENT SNAPSHOT — FORCE WHITE TEXT IN DARK MODE
    ============================================================ */
+
 .patient-snapshot,
 .patient-snapshot * {
     font-weight: 700 !important;
@@ -513,7 +514,6 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
 }
-
 
 /* Base side layout styling */
 [data-testid="stSidebar"] {
@@ -1209,9 +1209,14 @@ if get_theme_mode() == "Dark":
             color: #E2E8F0 !important;
         }
 
-
-        .patient-snapshot .snapshot-row {
-            border-bottom: 1px solid #334155 !important;
+        /* FORCE WHITE TEXT IN PATIENT SNAPSHOT (DARK MODE) */
+        .patient-snapshot,
+        .patient-snapshot *,
+        .patient-snapshot .snapshot-label,
+        .patient-snapshot .snapshot-value,
+        .patient-snapshot .section-title {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -1966,9 +1971,9 @@ elif st.session_state.view_mode == "result":
                 display_value = f"{value} µmol/L"
 
             st.markdown(
-                f"<div class='snapshot-row' style='padding:8px 0;'>"
-                f"<span class='snapshot-label' style='color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;'>{pretty}</span>"
-                f"<span class='snapshot-value' style='float:right;color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;'>{display_value}</span>"
+                f"<div class='snapshot-row' style='padding:8px 0;border-bottom:1px solid #E2E8F0;'>"
+                f"<span class='snapshot-label'>{pretty}</span>"
+                f"<span class='snapshot-value' style='float:right'>{display_value}</span>"
                 f"</div>",
                 unsafe_allow_html=True
             )
