@@ -631,45 +631,36 @@ button[data-testid="stBaseButton-headerNoPadding"]:hover {
 
 /* ============================================================
        PATIENT SNAPSHOT — BOLDER DARK-MODE TEXT
-       ============================================================ */
-    .patient-snapshot,
-    .patient-snapshot * {
-        font-weight: 700 !important;
-    }
+============================================================ */
+   /* Patient Snapshot Styles */
+.patient-snapshot,
+.patient-snapshot * {
+    font-weight: 700 !important;
+    color: #38BDF8 !important; /* Light blue accent */
+    -webkit-text-fill-color: #38BDF8 !important;
+}
 
-    /* Keep the normal/light theme unchanged. */
-    .patient-snapshot .snapshot-label {
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.01em !important;
-    }
+.patient-snapshot .snapshot-label {
+    color: #38BDF8 !important;
+    -webkit-text-fill-color: #38BDF8 !important;
+    font-weight: 700 !important;
+}
 
-    .patient-snapshot .snapshot-value {
-        color: #0F172A !important;
-        -webkit-text-fill-color: #0F172A !important;
-        font-weight: 750 !important;
-    }
+.patient-snapshot .snapshot-value {
+    color: #38BDF8 !important;
+    -webkit-text-fill-color: #38BDF8 !important;
+    font-weight: 750 !important;
+}
 
-    /* The app's own Dark-mode switch is handled in Python below.
-       These selectors are additionally used for browser dark mode. */
-    @media (prefers-color-scheme: dark) {
-        .patient-snapshot .snapshot-label,
-        .patient-snapshot .snapshot-value,
-        .patient-snapshot .section-title {
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            font-weight: 750 !important;
-        }
+/* Remove dark mode override to keep light blue consistent in both themes */
+@media (prefers-color-scheme: dark) {
+    .patient-snapshot .snapshot-label,
+    .patient-snapshot .snapshot-value,
+    .patient-snapshot .section-title {
+        color: #38BDF8 !important;
+        -webkit-text-fill-color: #38BDF8 !important;
     }
-
-    /* Strong readable result snapshot text */
-    .result-snapshot-text {
-        color: #FFFFFF !important;
-        font-weight: 750 !important;
-        font-size: 0.95rem !important;
-    }
-
+}
 
 /* ============================================================
    FINAL SIDEBAR / SETTINGS LAYOUT
@@ -3187,6 +3178,7 @@ button[aria-label="Main Menu"] {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ============================================================
 # FINAL FIX: REMOVE THE VERTICAL CARET/LINE INSIDE SELECTBOXES
