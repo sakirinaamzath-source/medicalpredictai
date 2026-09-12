@@ -451,7 +451,6 @@ div[data-testid="stNumberInputContainer"] [aria-label="Clear value"] {
    Closed field: white with black text.
    Open menu: white with black text.
    Hover/selected option: blue with white text.
-   This stays white even in Dark mode, matching the reference.
    ============================================================ */
 
 /* Closed selectbox field */
@@ -472,10 +471,7 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] * {
     opacity: 1 !important;
 }
 
-
-/* Hide the text caret inside Streamlit selectboxes.
-   Streamlit uses an internal input for the selectbox; in dark mode
-   the caret can look like a typing cursor inside the selected value. */
+/* Hide the text caret inside Streamlit selectboxes */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] input,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] input[role="combobox"],
 div[data-testid="stSelectbox"] div[data-baseweb="select"] [contenteditable="true"],
@@ -485,7 +481,6 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] [contenteditable="true
     outline: none !important;
 }
 
-/* Never show a text cursor while a selectbox is focused/open. */
 div[data-testid="stSelectbox"]:focus-within input,
 div[data-testid="stSelectbox"]:focus-within [contenteditable="true"] {
     caret-color: transparent !important;
@@ -514,51 +509,39 @@ div[role="listbox"] {
     box-shadow: 0 8px 24px rgba(15,23,42,0.14) !important;
 }
 
-/* Every dropdown option — white background + black text */
-div[data-baseweb="popover"] div[role="option"],
-div[data-baseweb="menu"] div[role="option"],
-div[role="listbox"] div[role="option"],
-div[data-baseweb="popover"] [role="option"] > div,
-div[data-baseweb="menu"] [role="option"] > div,
-div[role="listbox"] [role="option"] > div {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    color: #0F172A !important;
-}
-
-/* Option text/icons — black */
+/* Base dropdown option — Default white background with black text */
+div[data-baseweb="popover"] [role="option"],
+div[data-baseweb="menu"] [role="option"],
+div[role="listbox"] [role="option"],
 div[data-baseweb="popover"] [role="option"] *,
 div[data-baseweb="menu"] [role="option"] *,
 div[role="listbox"] [role="option"] * {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     color: #0F172A !important;
     fill: #0F172A !important;
     stroke: #0F172A !important;
 }
 
-/* Hover and selected option — blue, like the reference image */
+/* Hover and active states — Forces blue background with white text across all children */
 div[data-baseweb="popover"] [role="option"]:hover,
-div[data-baseweb="menu"] [role="option"]:hover,
-div[role="listbox"] [role="option"]:hover,
+div[data-baseweb="popover"] [role="option"]:hover *,
 div[data-baseweb="popover"] [role="option"][aria-selected="true"],
+div[data-baseweb="popover"] [role="option"][aria-selected="true"] *,
+div[data-baseweb="menu"] [role="option"]:hover,
+div[data-baseweb="menu"] [role="option"]:hover *,
 div[data-baseweb="menu"] [role="option"][aria-selected="true"],
-div[role="listbox"] [role="option"][aria-selected="true"] {
+div[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
+div[role="listbox"] [role="option"]:hover,
+div[role="listbox"] [role="option"]:hover *,
+div[role="listbox"] [role="option"][aria-selected="true"],
+div[role="listbox"] [role="option"][aria-selected="true"] * {
     background: #2563EB !important;
     background-color: #2563EB !important;
-    color: #FFFFFF !important;
-}
-
-/* Hover/selected text and icons — white */
-div[data-baseweb="popover"] [role="option"]:hover *,
-div[data-baseweb="menu"] [role="option"]:hover *,
-div[role="listbox"] [role="option"]:hover *,
-div[data-baseweb="popover"] [role="option"][aria-selected="true"] *,
-div[data-baseweb="menu"] [role="option"][aria-selected="true"] *,
-div[role="listbox"] [role="option"][aria-selected="true"] * {
     color: #FFFFFF !important;
     fill: #FFFFFF !important;
     stroke: #FFFFFF !important;
 }
-
 
 /* ============================================================
    SIDEBAR HAMBURGER — CLEAN SINGLE IMPLEMENTATION
