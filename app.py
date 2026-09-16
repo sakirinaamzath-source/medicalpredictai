@@ -1299,12 +1299,6 @@ with st.sidebar:
         st.session_state.theme_mode = theme_choice
         st.session_state.sidebar_theme = theme_choice
 
-    if theme_choice == "Dark":
-        st.markdown(
-            "<div class='small-muted'>Dark theme selected. Restart the app if the browser theme does not update immediately.</div>",
-            unsafe_allow_html=True
-        )
-
 
     if st.button("⌫   Clear cache", key="sidebar_clear_cache", use_container_width=True):
         st.cache_data.clear()
@@ -2234,7 +2228,7 @@ elif st.session_state.view_mode == "input":
                 inputs["chol"] = clearable_number_input(
                     "Total Cholesterol (mg/dL)", key="heart_chol",
                     min_value=0, max_value=600, value=None,
-                    placeholder="e.g. "
+                    placeholder="e.g. 165"
                 )
 
             st.markdown(
