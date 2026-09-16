@@ -2187,22 +2187,22 @@ elif st.session_state.view_mode == "input":
                 inputs["Age"] = clearable_number_input(
                     "Age (years)", key="heart_age",
                     min_value=0, max_value=120, value=None,
-                    placeholder="Enter age"
+                    placeholder="e.g. 32"
                 )
                 inputs["Height"] = clearable_number_input(
                     "Height (cm)", key="heart_height",
                     min_value=0, max_value=250, value=None,
-                    placeholder="Enter height"
+                    placeholder="e.g. 175"
                 )
                 inputs["trestbps"] = clearable_number_input(
                     "Systolic Blood Pressure (mmHg)", key="heart_trestbps",
                     min_value=0, max_value=250, value=None,
-                    placeholder="Enter systolic blood pressure"
+                    placeholder="e.g. 112"
                 )
                 fasting_glucose = clearable_number_input(
                     "Blood Glucose / Fasting (mg/dL)", key="heart_fasting_glucose",
                     min_value=0, max_value=500, value=None,
-                    placeholder="Enter fasting glucose"
+                    placeholder="e.g. 88"
                 )
                 inputs["Fasting_Glucose"] = fasting_glucose
                 # Cleveland heart-disease 'fbs' is binary: 1 means fasting
@@ -2224,17 +2224,17 @@ elif st.session_state.view_mode == "input":
                 inputs["Weight"] = clearable_number_input(
                     "Weight (kg)", key="heart_weight",
                     min_value=0, max_value=300, value=None,
-                    placeholder="Enter weight"
+                    placeholder="e.g. 65"
                 )
                 inputs["thalach"] = clearable_number_input(
                     "Maximum Heart Rate (bpm)", key="heart_thalach",
                     min_value=0, max_value=250, value=None,
-                    placeholder="Enter maximum heart rate"
+                    placeholder="e.g. 155"
                 )
                 inputs["chol"] = clearable_number_input(
                     "Total Cholesterol (mg/dL)", key="heart_chol",
                     min_value=0, max_value=600, value=None,
-                    placeholder="Enter cholesterol"
+                    placeholder="e.g. "
                 )
 
             st.markdown(
@@ -2304,7 +2304,7 @@ elif st.session_state.view_mode == "input":
                 inputs["oldpeak"] = clearable_number_input(
                     "Oldpeak", key="heart_oldpeak",
                     min_value=0.0, max_value=10.0, value=None,
-                    placeholder="Enter oldpeak"
+                    placeholder="e.g. 1.0"
                 )
 
             with q2:
@@ -2376,27 +2376,27 @@ elif st.session_state.view_mode == "input":
 
         elif current_dis == "diabetes":
             with c1:
-                inputs["AGE"] = clearable_number_input("Age (years)", key="diabetes_age", min_value=0, max_value=120, value=None, placeholder="Enter age")
-                inputs["BMI"] = clearable_number_input("BMI (kg/m²)", key="diabetes_bmi", min_value=0.0, max_value=80.0, value=None, placeholder="Enter BMI")
-                inputs["HbA1c"] = clearable_number_input("HbA1c Level (%)", key="diabetes_hba1c", min_value=0.0, max_value=20.0, value=None, placeholder="Enter HbA1c level")
-                inputs["Urea"] = clearable_number_input("Urea (mmol/L)", key="diabetes_urea", min_value=0.0, max_value=50.0, value=None, placeholder="Enter urea")
-                inputs["Cr"] = clearable_number_input("Creatinine (µmol/L)", key="diabetes_cr", min_value=0.0, max_value=1000.0, value=None, placeholder="Enter creatinine")
+                inputs["AGE"] = clearable_number_input("Age (years)", key="diabetes_age", min_value=0, max_value=120, value=None, placeholder="e.g. 25")
+                inputs["BMI"] = clearable_number_input("BMI (kg/m²)", key="diabetes_bmi", min_value=0.0, max_value=80.0, value=None, placeholder="e.g. 18.5")
+                inputs["HbA1c"] = clearable_number_input("HbA1c Level (%)", key="diabetes_hba1c", min_value=0.0, max_value=20.0, value=None, placeholder="e.g. 5.1")
+                inputs["Urea"] = clearable_number_input("Urea (mmol/L)", key="diabetes_urea", min_value=0.0, max_value=50.0, value=None, placeholder="e.g. 3.8")
+                inputs["Cr"] = clearable_number_input("Creatinine (µmol/L)", key="diabetes_cr", min_value=0.0, max_value=1000.0, value=None, placeholder="e.g. 55")
             with c2:
                 gender = st.selectbox("Gender", ["Male", "Female"], index=None, placeholder="Select gender")
                 inputs["Gender_M"] = None if gender is None else (1 if gender == "Male" else 0)
                 inputs["Gender_f"] = None if gender is None else (1 if gender == "Female" else 0)
-                inputs["Chol"] = clearable_number_input("Cholesterol (mmol/L)", key="diabetes_chol", min_value=0.0, max_value=20.0, value=None, placeholder="Enter cholesterol")
-                inputs["TG"] = clearable_number_input("Triglycerides (mmol/L)", key="diabetes_tg", min_value=0.0, max_value=30.0, value=None, placeholder="Enter triglycerides")
-                inputs["HDL"] = clearable_number_input("HDL (mmol/L)", key="diabetes_hdl", min_value=0.0, max_value=10.0, value=None, placeholder="Enter HDL")
-                inputs["LDL"] = clearable_number_input("LDL (mmol/L)", key="diabetes_ldl", min_value=0.0, max_value=20.0, value=None, placeholder="Enter LDL")
+                inputs["Chol"] = clearable_number_input("Cholesterol (mmol/L)", key="diabetes_chol", min_value=0.0, max_value=20.0, value=None, placeholder="e.g. 4.1")
+                inputs["TG"] = clearable_number_input("Triglycerides (mmol/L)", key="diabetes_tg", min_value=0.0, max_value=30.0, value=None, placeholder="e.g. 1.1")
+                inputs["HDL"] = clearable_number_input("HDL (mmol/L)", key="diabetes_hdl", min_value=0.0, max_value=10.0, value=None, placeholder="e.g. 1.6")
+                inputs["LDL"] = clearable_number_input("LDL (mmol/L)", key="diabetes_ldl", min_value=0.0, max_value=20.0, value=None, placeholder="e.g. 2.1")
 
         elif current_dis == "kidney":
             with c1:
-                inputs["Age"] = clearable_number_input("Age (years)", key="kidney_age", min_value=0, max_value=120, value=None, placeholder="Enter age")
-                inputs["Creatinine_Level"] = clearable_number_input("Creatinine Level (mg/dL)", key="kidney_creatinine", min_value=0.0, max_value=20.0, value=None, placeholder="Enter creatinine level")
-                inputs["BUN"] = clearable_number_input("BUN (mg/dL)", key="kidney_bun", min_value=0.0, max_value=200.0, value=None, placeholder="Enter BUN")
+                inputs["Age"] = clearable_number_input("Age (years)", key="kidney_age", min_value=0, max_value=120, value=None, placeholder="e.g. 25")
+                inputs["Creatinine_Level"] = clearable_number_input("Creatinine Level (mg/dL)", key="kidney_creatinine", min_value=0.0, max_value=20.0, value=None, placeholder="e.g. 0.8")
+                inputs["BUN"] = clearable_number_input("BUN (mg/dL)", key="kidney_bun", min_value=0.0, max_value=200.0, value=None, placeholder="e.g. 12.0")
             with c2:
-                inputs["Urine_Output"] = clearable_number_input("Urine Output (mL/day)", key="kidney_urine_output", min_value=0, max_value=10000, value=None, placeholder="Enter urine output")
+                inputs["Urine_Output"] = clearable_number_input("Urine Output (mL/day)", key="kidney_urine_output", min_value=0, max_value=10000, value=None, placeholder="e.g. 1500")
                 diabetes_history = st.selectbox(
                     "Diabetes History",
                     ["0 - No", "1 - Yes"],
@@ -2418,7 +2418,7 @@ elif st.session_state.view_mode == "input":
                     None if hypertension_history is None
                     else (0 if hypertension_history.startswith("0") else 1)
                 )
-                inputs["GFR"] = clearable_number_input("GFR Level", key="kidney_gfr", min_value=0.0, max_value=200.0, value=None, placeholder="Enter GFR")
+                inputs["GFR"] = clearable_number_input("GFR Level", key="kidney_gfr", min_value=0.0, max_value=200.0, value=None, placeholder="e.g. 105")
 
         st.markdown("""
         <div class='info-box'>
