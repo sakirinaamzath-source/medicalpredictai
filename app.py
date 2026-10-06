@@ -1283,11 +1283,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    st.markdown("---")
-    st.markdown(
-        "<div class='small-muted'>AI-assisted educational tool<br>Not a medical diagnosis</div>",
-        unsafe_allow_html=True
-    )
 
 # ============================================================
 # DYNAMIC DARK / LIGHT THEME
