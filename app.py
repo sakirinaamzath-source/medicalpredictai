@@ -1717,12 +1717,13 @@ if st.session_state.view_mode == "dashboard":
             </div>
             """, unsafe_allow_html=True)
 
-            if st.button(f"Assess {name}  →", key=f"home_{key}", use_container_width=True):
-                st.session_state.selected_disease = key
-                st.session_state.view_mode = "input"
-                st.rerun()
+
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    if st.button("🔄 New Assessment", key="home_new_assessment", use_container_width=True):
+        st.session_state.view_mode = "select"
+        st.rerun()
 
     # Analytics bento row
     a1, a2 = st.columns([1.45, 1])
@@ -2092,29 +2093,32 @@ elif st.session_state.view_mode == "input":
         submit = st.form_submit_button("🔍 Analyze Health Risk", use_container_width=True)
 
         if submit:
-            # Only the important clinical fields need at least one value.
-            # Optional fields may remain blank and the model will use
-            # training-data defaults for those missing values.
-            # Require a meaningful minimum set of patient information.
-            # Missing optional fields are allowed, but a single field such as
-            # Gender alone is not enough to generate a prediction.
-            minimum_required_fields = {
-                "heart": {"Age", "Sex", "trestbps", "thalach", "chol", "cp"},
-                "diabetes": {"AGE", "BMI", "HbA1c", "Gender_M", "Gender_f"},
-                "kidney": {"Age", "Creatinine_Level", "BUN", "GFR", "Urine_Output"},
+            validation_ranges = {
+                "heart": {"Age": (0,120), "Height": (0,250), "trestbps": (0,250), "Fasting_Glucose": (0,500), "Weight": (0,300), "thalach": (0,250), "chol": (0,600), "cp": (0,3), "restecg": (0,2), "exang": (0,1), "oldpeak": (0,10), "slope": (0,2), "ca": (0,4), "thal": (1,3)},
+                "diabetes": {"AGE": (0,120), "BMI": (0,80), "HbA1c": (0,20), "Urea": (0,50), "Cr": (0,1000), "Chol": (0,20), "TG": (0,30), "HDL": (0,10), "LDL": (0,20)},
+                "kidney": {"Age": (0,120), "Creatinine_Level": (0,20), "BUN": (0,200), "Urine_Output": (0,10000), "GFR": (0,200)},
             }
 
-            required_keys = minimum_required_fields.get(current_dis, set())
-            filled_required_count = sum(
-                inputs.get(key) is not None for key in required_keys
-            )
+            validation_message = None
 
-            # At least 3 important fields must be supplied.
-            # The remaining fields can be left blank.
-            if filled_required_count < 3:
-                st.warning(
-                    "Please fill in the important patient information above before analyzing your health risk."
-                )
+            if any(value is None for value in inputs.values()):
+                validation_message = "Please fill in all input fields before analyzing your health risk."
+            else:
+                for field, value in inputs.items():
+                    if field in validation_ranges[current_dis]:
+                        minimum, maximum = validation_ranges[current_dis][field]
+                        try:
+                            numeric_value = float(value)
+                        except (TypeError, ValueError):
+                            validation_message = f"Please enter a valid numeric value for {field}."
+                            break
+                        if numeric_value < minimum or numeric_value > maximum:
+                            validation_message = f"Invalid value for {field}. Please enter a value between {minimum:g} and {maximum:g}."
+                            break
+
+            if validation_message:
+                st.warning(validation_message)
+                st.session_state.last_prediction = None
             else:
                 st.session_state.user_inputs = inputs
                 st.session_state.view_mode = "result"
